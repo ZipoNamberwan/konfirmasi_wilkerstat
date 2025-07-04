@@ -23,11 +23,8 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<LoginBloc>(
-          create:
-              (context) =>
-                  LoginBloc()
-                    ..add(InitLogin())
-                    ..add(MockupLogin()),
+          create: (context) => LoginBloc()..add(InitLogin()),
+          // ..add(MockupLogin()),
         ),
       ],
       child: MaterialApp(

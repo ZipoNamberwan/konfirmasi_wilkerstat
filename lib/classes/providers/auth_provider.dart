@@ -35,6 +35,14 @@ class AuthProvider {
     return _sharedPreferenceService.getUser();
   }
 
+  List<Map<String, dynamic>> getVillages() {
+    return _sharedPreferenceService.getVillages();
+  }
+
+  List<Map<String, dynamic>> getSls() {
+    return _sharedPreferenceService.getSls();
+  }
+
   Future<void> saveToken(String token) async {
     await _sharedPreferenceService.saveToken(token);
   }
@@ -52,17 +60,21 @@ class AuthProvider {
     required String password,
   }) async {
     final response = await _dioService.dio.post(
-      '/login',
+      '/login/wilkerstat',
       data: {'email': email, 'password': password},
     );
 
     final data = response.data['data'];
     final token = data['token'];
     final user = data['user'];
+    final villages = data['villages'];
+    final sls = data['user']['wilkerstat_sls'];
 
     if (token != null) {
       await _sharedPreferenceService.saveToken(token);
       await _sharedPreferenceService.saveUser(user);
+      await _sharedPreferenceService.saveVillages(villages);
+      await _sharedPreferenceService.saveSls(sls);
     }
 
     return response.data;

@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String baseurl = 'http://192.168.1.7:8000';
+  static const String baseurl = 'http://10.11.252.163:8000';
   // static const String baseurl = 'http://10.35.0.227:8000';
   // static const String baseurl = 'https://kendedes.cathajatim.id';
   static const String apiUrl = '$baseurl/api';

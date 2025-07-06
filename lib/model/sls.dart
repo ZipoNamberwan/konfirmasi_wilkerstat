@@ -4,14 +4,12 @@ class Sls {
   final String id;
   final String code;
   final String name;
-  final bool isAdded;
   final Village village;
 
   Sls({
     required this.id,
     required this.code,
     required this.name,
-    required this.isAdded,
     required this.village,
   });
 
@@ -21,7 +19,6 @@ class Sls {
       id: json['id'].toString(),
       code: json['short_code'] as String,
       name: json['name'] as String,
-      isAdded: false,
       village: Village.fromJson(json['village'] as Map<String, dynamic>),
     );
   }
@@ -32,6 +29,7 @@ class Sls {
       'id': id,
       'short_code': code,
       'name': name,
+      'village_id': village.id,
     };
   }
 
@@ -47,7 +45,6 @@ class Sls {
       id: id ?? this.id,
       code: code ?? this.code,
       name: name ?? this.name,
-      isAdded: isAdded ?? this.isAdded,
       village: village ?? this.village,
     );
   }

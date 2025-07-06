@@ -20,7 +20,6 @@ class AddSls extends ProjectEvent {
   const AddSls({required this.slsId});
 }
 
-class RemoveSls extends ProjectEvent {
-  final String slsId;
-  const RemoveSls({required this.slsId});
+class DownloadAssignments extends ProjectEvent {
+  const DownloadAssignments();
 }

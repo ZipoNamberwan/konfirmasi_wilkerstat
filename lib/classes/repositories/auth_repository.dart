@@ -1,7 +1,5 @@
 import 'package:konfirmasi_wilkerstat/classes/providers/auth_provider.dart';
-import 'package:konfirmasi_wilkerstat/model/sls.dart';
 import 'package:konfirmasi_wilkerstat/model/user.dart';
-import 'package:konfirmasi_wilkerstat/model/village.dart';
 
 class AuthRepository {
   static final AuthRepository _instance = AuthRepository._internal();
@@ -35,41 +33,28 @@ class AuthRepository {
     return null;
   }
 
-  List<Village> getVillages() {
-    final villagesJson = _authProvider.getVillages();
-    return villagesJson.map((village) => Village.fromJson(village)).toList();
+  Future<void> saveToken(String token) async {
+    await _authProvider.saveToken(token);
   }
 
-  List<Sls> getSls() {
-    final slsJson =
-        _authProvider.getSls(); // returns List<Map<String, dynamic>>
-    final villages = getVillages(); // already implemented
-    final Map<String, Village> villageMap = {for (var v in villages) v.id: v};
-
-    return slsJson.map((json) {
-      final villageId = json['village_id'] as String;
-
-      return Sls(
-        id: json['id'].toString(),
-        code: json['short_code'] as String,
-        name: json['name'] as String,
-        isAdded: false,
-        village: villageMap[villageId]!,
-      );
-    }).toList();
+  Future<void> saveUser(User user) async {
+    await _authProvider.saveUser(user.toJson());
   }
 
   Future<void> clearToken() async {
     await _authProvider.clearToken();
   }
 
-  Future<User> login({required String email, required String password}) async {
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
     final response = await _authProvider.login(
       email: email,
       password: password,
     );
 
-    return User.fromJson(response['data']['user']);
+    return response;
   }
 
   Future<void> logout() async {

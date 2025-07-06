@@ -95,7 +95,25 @@ final Map<String, dynamic> dummyVillageData = {
 };
 
 final List<Village> dummyVillages = [
-  Village(id: "3513010001", code: "3513010001", name: "Desa 1"),
-  Village(id: "3513010002", code: "3513010002", name: "Desa 2"),
-  Village(id: "3513010003", code: "3513010003", name: "Desa 3"),
+  Village(
+    id: "3513010001",
+    code: "3513010001",
+    name: "Desa 1",
+    hasDownloaded: false,
+    isDeleted: false,
+  ),
+  Village(
+    id: "3513010002",
+    code: "3513010002",
+    name: "Desa 2",
+    hasDownloaded: false,
+    isDeleted: false,
+  ),
+  Village(
+    id: "3513010003",
+    code: "3513010003",
+    name: "Desa 3",
+    hasDownloaded: false,
+    isDeleted: false,
+  ),
 ];

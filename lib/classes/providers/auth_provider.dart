@@ -1,5 +1,4 @@
 
-
 import 'package:konfirmasi_wilkerstat/classes/services/dio_service.dart';
 import 'package:konfirmasi_wilkerstat/classes/services/shared_preference_service.dart';
 
@@ -35,14 +34,6 @@ class AuthProvider {
     return _sharedPreferenceService.getUser();
   }
 
-  List<Map<String, dynamic>> getVillages() {
-    return _sharedPreferenceService.getVillages();
-  }
-
-  List<Map<String, dynamic>> getSls() {
-    return _sharedPreferenceService.getSls();
-  }
-
   Future<void> saveToken(String token) async {
     await _sharedPreferenceService.saveToken(token);
   }
@@ -64,20 +55,7 @@ class AuthProvider {
       data: {'email': email, 'password': password},
     );
 
-    final data = response.data['data'];
-    final token = data['token'];
-    final user = data['user'];
-    final villages = data['villages'];
-    final sls = data['user']['wilkerstat_sls'];
-
-    if (token != null) {
-      await _sharedPreferenceService.saveToken(token);
-      await _sharedPreferenceService.saveUser(user);
-      await _sharedPreferenceService.saveVillages(villages);
-      await _sharedPreferenceService.saveSls(sls);
-    }
-
-    return response.data;
+    return response.data['data'];
   }
 
   Future<void> logout() async {

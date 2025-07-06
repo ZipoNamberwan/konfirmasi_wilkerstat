@@ -15,6 +15,20 @@ class Initializing extends ProjectState {
   const Initializing({required super.data});
 }
 
+class NoAssignment extends ProjectState {
+  const NoAssignment({required super.data});
+}
+
+class InitializingError extends ProjectState {
+  final String errorMessage;
+  const InitializingError(this.errorMessage, {required super.data});
+}
+
+class DownloadAssignmentsFailed extends ProjectState {
+  final String errorMessage;
+  const DownloadAssignmentsFailed(this.errorMessage, {required super.data});
+}
+
 class DownloadVillageDataSuccess extends ProjectState {
   const DownloadVillageDataSuccess({required super.data});
 }
@@ -32,6 +46,7 @@ class TokenExpired extends ProjectState {
 }
 
 class ProjectStateData {
+  final bool isInitializing;
   final bool isDownloadingAssignments;
   final List<Village> villages;
   final List<Sls> sls;
@@ -39,18 +54,20 @@ class ProjectStateData {
   ProjectStateData({
     required this.villages,
     required this.sls,
+    required this.isInitializing,
     required this.isDownloadingAssignments,
   });
 
   ProjectStateData copyWith({
     List<Village>? villages,
     List<Sls>? sls,
+    bool? isInitializing,
     bool? isDownloadingAssignments,
-    bool? isDownloadingBusinesses,
   }) {
     return ProjectStateData(
       villages: villages ?? this.villages,
       sls: sls ?? this.sls,
+      isInitializing: isInitializing ?? this.isInitializing,
       isDownloadingAssignments:
           isDownloadingAssignments ?? this.isDownloadingAssignments,
     );

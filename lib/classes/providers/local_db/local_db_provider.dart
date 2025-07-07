@@ -46,6 +46,8 @@ class LocalDbProvider {
       short_code TEXT NOT NULL,
       name TEXT NOT NULL,
       village_id TEXT NOT NULL,
+      has_downloaded INTEGER NOT NULL DEFAULT 0,
+      is_deleted INTEGER NOT NULL DEFAULT 0,
       FOREIGN KEY(village_id) REFERENCES village(id) ON DELETE CASCADE
     );
   ''');

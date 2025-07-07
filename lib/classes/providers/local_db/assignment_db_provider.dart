@@ -2,7 +2,8 @@ import 'package:konfirmasi_wilkerstat/classes/providers/local_db/local_db_provid
 import 'package:sqflite/sqflite.dart';
 
 class AssignmentDbProvider {
-  static final AssignmentDbProvider _instance = AssignmentDbProvider._internal();
+  static final AssignmentDbProvider _instance =
+      AssignmentDbProvider._internal();
   factory AssignmentDbProvider() => _instance;
 
   AssignmentDbProvider._internal();
@@ -43,6 +44,7 @@ class AssignmentDbProvider {
         'short_code': sl['short_code'],
         'name': sl['name'],
         'village_id': sl['village_id'],
+        'has_downloaded': (sl['hasDownloaded'] ?? false) ? 1 : 0,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
 
@@ -55,5 +57,103 @@ class AssignmentDbProvider {
 
   Future<List<Map<String, dynamic>>> getSls() async {
     return await _dbProvider.db.query('sls');
+  }
+
+  Future<List<Map<String, dynamic>>> getActiveVillages() async {
+    return await _dbProvider.db.query(
+      'village',
+      where: 'is_deleted = ?',
+      whereArgs: [0],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getActiveSls() async {
+    return await _dbProvider.db.query(
+      'sls',
+      where: 'is_deleted = ?',
+      whereArgs: [0],
+    );
+  }
+
+  Future<void> markVillagesAsDeleted(List<String> villageIds) async {
+    final batch = _dbProvider.db.batch();
+
+    for (final id in villageIds) {
+      batch.update(
+        'village',
+        {'is_deleted': 1},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
+
+    await batch.commit(noResult: true);
+  }
+
+  Future<void> reactivateVillages(List<String> villageIds) async {
+    final batch = _dbProvider.db.batch();
+
+    for (final id in villageIds) {
+      batch.update(
+        'village',
+        {'is_deleted': 0},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
+
+    await batch.commit(noResult: true);
+  }
+
+  Future<void> markSlsAsDeleted(List<String> slsIds) async {
+    final batch = _dbProvider.db.batch();
+    for (final id in slsIds) {
+      batch.update('sls', {'is_deleted': 1}, where: 'id = ?', whereArgs: [id]);
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<void> reactivateSls(List<String> slsIds) async {
+    final batch = _dbProvider.db.batch();
+    for (final id in slsIds) {
+      batch.update('sls', {'is_deleted': 0}, where: 'id = ?', whereArgs: [id]);
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<void> updateVillageDownloadStatus(
+    String villageId,
+    bool hasDownloaded,
+  ) async {
+    final batch = _dbProvider.db.batch();
+
+    // Update the village's hasDownloaded status
+    batch.update(
+      'village',
+      {'has_downloaded': hasDownloaded ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [villageId],
+    );
+
+    // If village is marked as downloaded, also mark all its SLS as downloaded
+    if (hasDownloaded) {
+      batch.update(
+        'sls',
+        {'has_downloaded': 1},
+        where: 'village_id = ?',
+        whereArgs: [villageId],
+      );
+    }
+
+    await batch.commit(noResult: true);
+  }
+
+  Future<void> updateSlsDownloadStatus(String slsId, bool hasDownloaded) async {
+    await _dbProvider.db.update(
+      'sls',
+      {'has_downloaded': hasDownloaded ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [slsId],
+    );
   }
 }

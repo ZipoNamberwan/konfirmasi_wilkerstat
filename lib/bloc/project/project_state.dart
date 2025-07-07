@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
+import 'package:konfirmasi_wilkerstat/model/user.dart';
 import 'package:konfirmasi_wilkerstat/model/village.dart';
 
 class ProjectState extends Equatable {
@@ -50,12 +51,14 @@ class ProjectStateData {
   final bool isDownloadingAssignments;
   final List<Village> villages;
   final List<Sls> sls;
+  final User? user;
 
   ProjectStateData({
     required this.villages,
     required this.sls,
     required this.isInitializing,
     required this.isDownloadingAssignments,
+    this.user,
   });
 
   ProjectStateData copyWith({
@@ -63,6 +66,7 @@ class ProjectStateData {
     List<Sls>? sls,
     bool? isInitializing,
     bool? isDownloadingAssignments,
+    User? user,
   }) {
     return ProjectStateData(
       villages: villages ?? this.villages,
@@ -70,6 +74,7 @@ class ProjectStateData {
       isInitializing: isInitializing ?? this.isInitializing,
       isDownloadingAssignments:
           isDownloadingAssignments ?? this.isDownloadingAssignments,
+      user: user ?? this.user,
     );
   }
 }

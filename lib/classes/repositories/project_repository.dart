@@ -15,13 +15,4 @@ class ProjectRepository {
     _projectProvider = ProjectProvider();
     await _projectProvider.init();
   }
-
-  Future<Map<String, dynamic>> getVillage(String villageId) async {
-    // TODO - Implement the API call to fetch assignments for the user
-    final Map<String, dynamic> response = await _projectProvider.getVillage(
-      villageId,
-    );
-
-    return response;
-  }
 }

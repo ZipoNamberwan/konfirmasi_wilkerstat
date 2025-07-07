@@ -128,28 +128,98 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           final villages = response['villages'];
           final sls = response['user']['wilkerstat_sls'];
 
+          // // save villages and sls
+          // List<Village> villageList =
+          //     villages
+          //         .map<Village>((village) => Village.fromJson(village))
+          //         .toList();
+          // await AssignmentDbRepository().saveVillages(villageList);
+
+          // final Map<String, Village> villageMap = {
+          //   for (var v in villages) v['id'].toString(): Village.fromJson(v),
+          // };
+          // List<Sls> slsList =
+          //     sls.map<Sls>((json) {
+          //       final villageId = json['village_id'] as String;
+
+          //       return Sls(
+          //         id: json['id'].toString(),
+          //         code: json['short_code'] as String,
+          //         name: json['name'] as String,
+          //         village: villageMap[villageId]!,
+          //         isDeleted: false, // Assuming Sls is not deleted initially
+          //         hasDownloaded:
+          //             false, // Assuming Sls is not downloaded initially
+          //       );
+          //     }).toList();
+          // await AssignmentDbRepository().saveSls(slsList);
+
+          final incomingVillageIds =
+              villages.map<String>((v) => v['id'].toString()).toSet();
+          final localVillages =
+              await AssignmentDbRepository()
+                  .getVillages(); // includes is_deleted
+          final localVillageMap = {for (var v in localVillages) v.id: v};
+
+          // 1. Insert new and Reactivate soft-deleted
+          List<Village> villagesToInsert = [];
+          List<String> villageIdsToReactivate = [];
+
+          for (final v in villages) {
+            final id = v['id'].toString();
+            if (!localVillageMap.containsKey(id)) {
+              villagesToInsert.add(Village.fromJson(v));
+            } else if (localVillageMap[id]!.isDeleted) {
+              villageIdsToReactivate.add(id);
+            }
+          }
+
+          await AssignmentDbRepository().saveVillages(villagesToInsert);
+          await AssignmentDbRepository().reactivateVillages(
+            villageIdsToReactivate,
+          );
+
+          // 2. Mark deleted: if local exists but missing from response
+          final localVillageIds = localVillageMap.keys.toSet();
+          final missingVillageIds = localVillageIds.difference(
+            incomingVillageIds,
+          );
+          await AssignmentDbRepository().markVillagesAsDeleted(
+            missingVillageIds.toList(),
+          );
+
           // save villages and sls
-          List<Village> villageList =
-              villages
-                  .map<Village>((village) => Village.fromJson(village))
-                  .toList();
-          await AssignmentDbRepository().saveVillages(villageList);
-
+          final updatedVillages = await AssignmentDbRepository().getVillages();
           final Map<String, Village> villageMap = {
-            for (var v in villages) v['id'].toString(): Village.fromJson(v),
+            for (var v in updatedVillages) v.id: v,
           };
-          List<Sls> slsList =
-              sls.map<Sls>((json) {
-                final villageId = json['village_id'] as String;
 
-                return Sls(
-                  id: json['id'].toString(),
-                  code: json['short_code'] as String,
-                  name: json['name'] as String,
-                  village: villageMap[villageId]!,
-                );
-              }).toList();
-          await AssignmentDbRepository().saveSls(slsList);
+          final incomingSlsIds =
+              sls.map<String>((s) => s['id'].toString()).toSet();
+          final localSlsList = await AssignmentDbRepository().getSls();
+          final localSlsMap = {for (var s in localSlsList) s.id: s};
+
+          List<Sls> slsToInsert = [];
+          List<String> slsToReactivate = [];
+
+          for (final s in sls) {
+            final id = s['id'].toString();
+            if (!localSlsMap.containsKey(id)) {
+              slsToInsert.add(Sls.fromJsonWithVillageMap(s, villageMap));
+            } else if (localSlsMap[id]!.isDeleted) {
+              slsToReactivate.add(id);
+            }
+          }
+
+          await AssignmentDbRepository().saveSls(slsToInsert);
+          await AssignmentDbRepository().reactivateSls(slsToReactivate);
+
+          // Mark SLS as deleted if missing from incoming
+          final localSlsIds = localSlsMap.keys.toSet();
+          final missingSlsIds = localSlsIds.difference(incomingSlsIds);
+          await AssignmentDbRepository().markSlsAsDeleted(
+            missingSlsIds.toList(),
+          );
 
           // save token and user
           AuthRepository().saveToken(token);

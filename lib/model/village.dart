@@ -19,11 +19,16 @@ class Village {
       code: json['short_code'] as String,
       name: json['name'] as String,
       hasDownloaded: false,
-      isDeleted: false,
+      isDeleted: (json['is_deleted'] ?? 0) == 1,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'short_code': code, 'name': name};
+    return {
+      'id': id,
+      'short_code': code,
+      'name': name,
+      'is_deleted': isDeleted ? 1 : 0,
+    };
   }
 }

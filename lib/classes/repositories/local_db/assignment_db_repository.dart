@@ -47,7 +47,64 @@ class AssignmentDbRepository {
         code: json['short_code'] as String,
         name: json['name'] as String,
         village: villageMap[villageId]!,
+        isDeleted:
+            json['is_deleted'] == 1, // Assuming is_deleted is stored as INTEGER
+        hasDownloaded:
+            json['has_downloaded'] == 1, // Assuming has_downloaded is INTEGER
       );
     }).toList();
+  }
+
+  Future<List<Village>> getActiveVillages() async {
+    final villagesJson = await _provider.getActiveVillages();
+    return villagesJson.map((village) => Village.fromJson(village)).toList();
+  }
+
+  Future<List<Sls>> getActiveSls() async {
+    final slsJson = await _provider.getActiveSls();
+    final villages = await getActiveVillages();
+    final Map<String, Village> villageMap = {for (var v in villages) v.id: v};
+
+    return slsJson.map((json) {
+      final villageId = json['village_id'] as String;
+
+      return Sls(
+        id: json['id'].toString(),
+        code: json['short_code'] as String,
+        name: json['name'] as String,
+        village: villageMap[villageId]!,
+        isDeleted:
+            json['is_deleted'] == 1, // Assuming is_deleted is stored as INTEGER
+        hasDownloaded:
+            json['has_downloaded'] == 1, // Assuming has_downloaded is INTEGER
+      );
+    }).toList();
+  }
+
+  Future<void> markVillagesAsDeleted(List<String> villageIds) async {
+    await _provider.markVillagesAsDeleted(villageIds);
+  }
+
+  Future<void> reactivateVillages(List<String> villageIds) async {
+    await _provider.reactivateVillages(villageIds);
+  }
+
+  Future<void> markSlsAsDeleted(List<String> slsIds) async {
+    await _provider.markSlsAsDeleted(slsIds);
+  }
+
+  Future<void> reactivateSls(List<String> slsIds) async {
+    await _provider.reactivateSls(slsIds);
+  }
+
+  Future<void> updateVillageDownloadStatus(
+    String villageId,
+    bool hasDownloaded,
+  ) async {
+    await _provider.updateVillageDownloadStatus(villageId, hasDownloaded);
+  }
+
+  Future<void> updateSlsDownloadStatus(String slsId, bool hasDownloaded) async {
+    await _provider.updateSlsDownloadStatus(slsId, hasDownloaded);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/login/login_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/login/login_event.dart';
+import 'package:konfirmasi_wilkerstat/bloc/login/logout_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_bloc.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/assignment_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
           // ..add(MockupLogin()),
         ),
         BlocProvider<ProjectBloc>(create: (context) => ProjectBloc()),
+        BlocProvider<LogoutBloc>(create: (context) => LogoutBloc()),
       ],
       child: MaterialApp(
         title: 'Konfirmasi Wilkerstat',

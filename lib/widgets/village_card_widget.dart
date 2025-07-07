@@ -160,14 +160,6 @@ class VillageCardWidget extends StatelessWidget {
                   '${village.id} • ${villageSlsList.length} SLS',
                   style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
-                trailing:
-                    !villageShowsAsDownloaded
-                        ? Icon(
-                          Icons.cloud_download_outlined,
-                          color: Colors.orange[600],
-                          size: 20,
-                        )
-                        : null,
               ),
             ),
 

@@ -4,15 +4,15 @@ import 'package:konfirmasi_wilkerstat/bloc/project/project_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_state.dart';
 import 'package:konfirmasi_wilkerstat/classes/app_config.dart';
+import 'package:konfirmasi_wilkerstat/widgets/about_app_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/assignment_state_widgets.dart';
+import 'package:konfirmasi_wilkerstat/widgets/download_confirmation_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/downloading_assignments_widget.dart';
+import 'package:konfirmasi_wilkerstat/widgets/initializing_widget.dart';
+import 'package:konfirmasi_wilkerstat/widgets/user_info_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/village_card_widget.dart';
 import 'package:konfirmasi_wilkerstat/widgets/logout_confirmation_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'widgets/assignment_state_widgets.dart';
-import 'widgets/download_confirmation_dialog.dart';
-import 'widgets/village_card_widget.dart';
-import 'widgets/downloading_assignments_widget.dart';
-import 'widgets/initializing_widget.dart';
-import 'widgets/about_app_dialog.dart';
-import 'widgets/user_info_dialog.dart';
 
 class SlsProjectList extends StatefulWidget {
   const SlsProjectList({super.key});

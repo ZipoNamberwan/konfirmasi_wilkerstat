@@ -156,4 +156,52 @@ class AssignmentDbProvider {
       whereArgs: [slsId],
     );
   }
+
+  Future<void> saveBusinesses(List<Map<String, dynamic>> businesses) async {
+    final batch = _dbProvider.db.batch();
+
+    for (final business in businesses) {
+      batch.insert('business', {
+        'id': business['id'],
+        'name': business['name'],
+        'owner': business['owner'],
+        'address': business['address'],
+        'sls_id': business['sls_id'],
+        'status': business['status'],
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+
+    await batch.commit(noResult: true);
+  }
+
+  Future<List<Map<String, dynamic>>> getBusinessesBySls(String slsId) async {
+    return await _dbProvider.db.query(
+      'business',
+      where: 'sls_id = ?',
+      whereArgs: [slsId],
+    );
+  }
+
+  Future<void> updateBusinessStatus(String businessId, String status) async {
+    await _dbProvider.db.update(
+      'business',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [businessId],
+    );
+  }
+
+  Future<Map<String, dynamic>> getSlsById(String slsId) async {
+    final List<Map<String, dynamic>> result = await _dbProvider.db.query(
+      'sls',
+      where: 'id = ?',
+      whereArgs: [slsId],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      throw Exception('SLS with id $slsId not found');
+    }
+  }
 }

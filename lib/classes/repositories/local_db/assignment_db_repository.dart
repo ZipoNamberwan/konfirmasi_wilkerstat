@@ -1,4 +1,5 @@
 import 'package:konfirmasi_wilkerstat/classes/providers/local_db/assignment_db_provider.dart';
+import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
 import 'package:konfirmasi_wilkerstat/model/village.dart';
 
@@ -106,5 +107,42 @@ class AssignmentDbRepository {
 
   Future<void> updateSlsDownloadStatus(String slsId, bool hasDownloaded) async {
     await _provider.updateSlsDownloadStatus(slsId, hasDownloaded);
+  }
+
+  Future<void> saveBusinesses(List<Business> businesses) async {
+    final businessesJson =
+        businesses.map((business) => business.toJson()).toList();
+    await _provider.saveBusinesses(businessesJson);
+  }
+
+  Future<void> updateBusinessStatus(String businessId, String status) async {
+    await _provider.updateBusinessStatus(businessId, status);
+  }
+
+  Future<List<Business>> getBusinessesBySls(String slsId) async {
+    final sls = await getSlsById(slsId);
+
+    final businessesJson = await _provider.getBusinessesBySls(slsId);
+    return businessesJson.map((json) {
+      return Business(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        owner: json['owner'] as String?,
+        address: json['address'] as String?,
+        sls: sls,
+        status:
+            json['status'] != null
+                ? BusinessStatus.fromKey(json['status'])
+                : BusinessStatus.notConfirmed,
+      );
+    }).toList();
+  }
+
+  Future<Sls> getSlsById(String slsId) async {
+    final slsJson = await _provider.getSlsById(slsId);
+    final villages = await getActiveVillages();
+    final Map<String, Village> villageMap = {for (var v in villages) v.id: v};
+
+    return Sls.fromJsonWithVillageMap(slsJson, villageMap);
   }
 }

@@ -20,4 +20,15 @@ class AssignmentRepository {
   Future<Map<String, dynamic>> getAssignments() async {
     return await _assignmentProvider.getAssignments();
   }
+
+  Future<List<Map<String, dynamic>>> downloadBusinessesByVillage(
+    String villageId,
+  ) async {
+    final businessesJson = await _assignmentProvider
+        .downloadBusinessesByVillage(villageId);
+
+    return businessesJson
+        .map<Map<String, dynamic>>((item) => item as Map<String, dynamic>)
+        .toList();
+  }
 }

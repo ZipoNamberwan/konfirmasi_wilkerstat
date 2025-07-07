@@ -8,6 +8,7 @@ class VillageCardWidget extends StatelessWidget {
   final List<Sls> villageSlsList;
   final Function(Village) onVillageDownload;
   final Function(Sls) onSlsDownload;
+  final Function(Sls)? onSlsClick;
 
   const VillageCardWidget({
     super.key,
@@ -15,6 +16,7 @@ class VillageCardWidget extends StatelessWidget {
     required this.villageSlsList,
     required this.onVillageDownload,
     required this.onSlsDownload,
+    this.onSlsClick,
   });
 
   @override
@@ -197,7 +199,11 @@ class VillageCardWidget extends StatelessWidget {
             if (isExpanded && villageSlsList.isNotEmpty) ...[
               const SizedBox(height: 6),
               ...villageSlsList.map((sls) {
-                return SlsItemWidget(sls: sls, onSlsDownload: onSlsDownload);
+                return SlsItemWidget(
+                  sls: sls,
+                  onSlsDownload: onSlsDownload,
+                  onSlsClick: onSlsClick,
+                );
               }),
               const SizedBox(height: 6),
             ],

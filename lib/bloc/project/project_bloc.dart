@@ -6,6 +6,7 @@ import 'package:konfirmasi_wilkerstat/classes/repositories/assignment_repository
 import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/assignment_db_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/telegram_logger.dart';
+import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
 import 'package:konfirmasi_wilkerstat/model/village.dart';
 
@@ -56,17 +57,32 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     });
 
     on<DownloadVillageData>((event, emit) async {
-      await AssignmentDbRepository().updateVillageDownloadStatus(
-        event.villageId,
-        true,
-      );
+      await ApiServerHandler.run(
+        action: () async {
+          final result = await AssignmentRepository()
+              .downloadBusinessesByVillage(event.villageId);
+          final businesses =
+              result.map((json) {
+                return Business.fromJson(json);
+              }).toList();
 
-      final villages = await AssignmentDbRepository().getActiveVillages();
+          await AssignmentDbRepository().saveBusinesses(businesses);
+          await AssignmentDbRepository().updateVillageDownloadStatus(
+            event.villageId,
+            true,
+          );
 
-      final sls = await AssignmentDbRepository().getActiveSls();
-
-      emit(
-        ProjectState(data: state.data.copyWith(villages: villages, sls: sls)),
+          final villages = await AssignmentDbRepository().getActiveVillages();
+          final sls = await AssignmentDbRepository().getActiveSls();
+          emit(
+            ProjectState(
+              data: state.data.copyWith(villages: villages, sls: sls),
+            ),
+          );
+        },
+        onLoginExpired: (e) {},
+        onDataProviderError: (e) {},
+        onOtherError: (e) {},
       );
     });
 

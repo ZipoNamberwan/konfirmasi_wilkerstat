@@ -20,4 +20,13 @@ class AssignmentProvider {
     final response = await _dioService.dio.get('/assignments/wilkerstat');
     return response.data['data'];
   }
+
+  Future<List<dynamic>> downloadBusinessesByVillage(
+    String villageId,
+  ) async {
+    final response = await _dioService.dio.get(
+      '/assignments/wilkerstat/village/$villageId',
+    );
+    return response.data['data'];
+  }
 }

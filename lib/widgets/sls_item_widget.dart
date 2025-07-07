@@ -4,11 +4,13 @@ import 'package:konfirmasi_wilkerstat/model/sls.dart';
 class SlsItemWidget extends StatelessWidget {
   final Sls sls;
   final Function(Sls) onSlsDownload;
+  final Function(Sls)? onSlsClick;
 
   const SlsItemWidget({
     super.key,
     required this.sls,
     required this.onSlsDownload,
+    this.onSlsClick,
   });
 
   @override
@@ -34,7 +36,11 @@ class SlsItemWidget extends StatelessWidget {
           ),
           onTap:
               slsIsDownloaded
-                  ? null
+                  ? () {
+                    if (onSlsClick != null) {
+                      onSlsClick!(sls);
+                    }
+                  }
                   : () {
                     onSlsDownload(sls);
                   },
@@ -74,7 +80,11 @@ class SlsItemWidget extends StatelessWidget {
           trailing:
               !slsIsDownloaded
                   ? Icon(Icons.lock_outline, color: Colors.grey[500], size: 16)
-                  : null,
+                  : Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.grey[600],
+                    size: 14,
+                  ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:konfirmasi_wilkerstat/bloc/project/project_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_state.dart';
 import 'package:konfirmasi_wilkerstat/classes/app_config.dart';
+  import 'package:konfirmasi_wilkerstat/pages/updating_page.dart';
 import 'package:konfirmasi_wilkerstat/widgets/about_app_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/assignment_state_widgets.dart';
 import 'package:konfirmasi_wilkerstat/widgets/download_confirmation_dialog.dart';
@@ -140,6 +141,12 @@ class _SlsProjectListState extends State<SlsProjectList> {
     );
   }
 
+  void _handleSlsClick(sls) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => UpdatingPage(selectedSls: sls)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProjectBloc, ProjectState>(
@@ -247,6 +254,7 @@ class _SlsProjectListState extends State<SlsProjectList> {
           villageSlsList: villageSlsList,
           onVillageDownload: _handleVillageDownload,
           onSlsDownload: _handleSlsDownload,
+          onSlsClick: _handleSlsClick, // Add this line
         );
       },
     );

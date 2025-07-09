@@ -72,6 +72,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
               _buildStatusButton(
                 state.data.isFirstStepDone(),
                 state.data.isSecondStepDone(),
+                state.data.isSecondStepNeeded(),
               ),
               IconButton(
                 onPressed: () => _showSlsInfo(),
@@ -617,17 +618,24 @@ class _UpdatingPageState extends State<UpdatingPage> {
     );
   }
 
-  Widget _buildStatusButton(bool isFirstStepDone, bool isSecondStepDone) {
+  Widget _buildStatusButton(
+    bool isFirstStepDone,
+    bool isSecondStepDone,
+    bool isSecondStepNeeded,
+  ) {
     Color circleColor;
     IconData buttonIcon;
     String tooltip;
 
-    if (isFirstStepDone && isSecondStepDone) {
-      // Both steps completed - Green
+    if (isFirstStepDone && (!isSecondStepNeeded || isSecondStepDone)) {
+      // All required steps completed - Green
       circleColor = Colors.green[400]!;
       buttonIcon = Icons.check_circle;
-      tooltip = 'Siap untuk dikirim';
-    } else if (isFirstStepDone && !isSecondStepDone) {
+      tooltip =
+          isSecondStepNeeded
+              ? 'Siap untuk dikirim'
+              : 'Siap untuk dikirim (1 langkah)';
+    } else if (isFirstStepDone && isSecondStepNeeded && !isSecondStepDone) {
       // Only first step completed - Orange
       circleColor = Colors.orange[400]!;
       buttonIcon = Icons.pending_actions;
@@ -636,7 +644,10 @@ class _UpdatingPageState extends State<UpdatingPage> {
       // No steps completed - Red
       circleColor = Colors.red[400]!;
       buttonIcon = Icons.error_outline;
-      tooltip = 'Belum ada langkah yang diselesaikan';
+      tooltip =
+          isSecondStepNeeded
+              ? 'Belum ada langkah yang diselesaikan'
+              : 'Konfirmasi usaha diperlukan';
     }
 
     return IconButton(

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:konfirmasi_wilkerstat/config/workflow_config.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
 
@@ -73,7 +74,17 @@ class UpdatingStateData {
   }
 
   bool isSecondStepDone() {
-    return true;
+    // If second step is not needed, consider it always done
+    if (!isSecondStepNeeded()) return true;
+
+    // TODO: Implement actual logic for when second step is completed
+    // This could check if photos are uploaded, etc.
+    return true; // Currently hardcoded as done
+  }
+
+  bool isSecondStepNeeded() {
+    // Use centralized configuration for workflow mode
+    return WorkflowConfig.isPhotoUploadStepNeeded;
   }
 }
 

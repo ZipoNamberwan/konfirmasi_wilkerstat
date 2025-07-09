@@ -29,19 +29,23 @@ class PrerequisitesPopup extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: (state.data.isFirstStepDone() &&
-                              state.data.isSecondStepDone()
+                              (!state.data.isSecondStepNeeded() ||
+                                  state.data.isSecondStepDone())
                           ? Colors.green
                           : Colors.orange)
                       .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  state.data.isFirstStepDone() && state.data.isSecondStepDone()
+                  state.data.isFirstStepDone() &&
+                          (!state.data.isSecondStepNeeded() ||
+                              state.data.isSecondStepDone())
                       ? Icons.check_circle
                       : Icons.list_alt,
                   color:
                       state.data.isFirstStepDone() &&
-                              state.data.isSecondStepDone()
+                              (!state.data.isSecondStepNeeded() ||
+                                  state.data.isSecondStepDone())
                           ? Colors.green[600]
                           : Colors.orange[600],
                   size: 20,
@@ -50,7 +54,9 @@ class PrerequisitesPopup extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  state.data.isFirstStepDone() && state.data.isSecondStepDone()
+                  state.data.isFirstStepDone() &&
+                          (!state.data.isSecondStepNeeded() ||
+                              state.data.isSecondStepDone())
                       ? 'Siap untuk Dikirim!'
                       : 'Langkah yang Diperlukan',
                   style: const TextStyle(
@@ -66,7 +72,9 @@ class PrerequisitesPopup extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                state.data.isFirstStepDone() && state.data.isSecondStepDone()
+                state.data.isFirstStepDone() &&
+                        (!state.data.isSecondStepNeeded() ||
+                            state.data.isSecondStepDone())
                     ? 'Semua persyaratan sudah terpenuhi. Data siap untuk dikirim ke server.'
                     : 'Selesaikan langkah-langkah berikut sebelum mengirim data:',
                 style: const TextStyle(fontSize: 14, color: Color(0xFF4A5568)),
@@ -81,16 +89,19 @@ class PrerequisitesPopup extends StatelessWidget {
                         ? 'Semua usaha telah dikonfirmasi'
                         : '${state.data.getNotconfirmedCount()} dari ${state.data.businesses.length} usaha belum dikonfirmasi',
               ),
-              const SizedBox(height: 12),
-              _buildPrerequisiteRow(
-                icon: Icons.camera_alt,
-                title: 'Upload Foto Dokumentasi',
-                isCompleted: state.data.isSecondStepDone(),
-                description:
-                    state.data.isSecondStepDone()
-                        ? 'Foto dokumentasi sudah diupload'
-                        : 'Ambil foto untuk dokumentasi proses',
-              ),
+              // Only show second step if needed
+              if (state.data.isSecondStepNeeded()) ...[
+                const SizedBox(height: 12),
+                _buildPrerequisiteRow(
+                  icon: Icons.camera_alt,
+                  title: 'Upload Foto Dokumentasi',
+                  isCompleted: state.data.isSecondStepDone(),
+                  description:
+                      state.data.isSecondStepDone()
+                          ? 'Foto dokumentasi sudah diupload'
+                          : 'Ambil foto untuk dokumentasi proses',
+                ),
+              ],
             ],
           ),
           actions: [
@@ -108,6 +119,7 @@ class PrerequisitesPopup extends StatelessWidget {
               ),
             ],
             if (state.data.isFirstStepDone() &&
+                state.data.isSecondStepNeeded() &&
                 !state.data.isSecondStepDone()) ...[
               TextButton.icon(
                 onPressed: () {
@@ -122,7 +134,8 @@ class PrerequisitesPopup extends StatelessWidget {
               ),
             ],
             if (state.data.isFirstStepDone() &&
-                state.data.isSecondStepDone()) ...[
+                (!state.data.isSecondStepNeeded() ||
+                    state.data.isSecondStepDone())) ...[
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pop(context);

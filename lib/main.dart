@@ -4,6 +4,7 @@ import 'package:konfirmasi_wilkerstat/bloc/login/login_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/login/login_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/login/logout_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_bloc.dart';
+import 'package:konfirmasi_wilkerstat/bloc/updating/updating_bloc.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/assignment_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/assignment_db_repository.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider<ProjectBloc>(create: (context) => ProjectBloc()),
         BlocProvider<LogoutBloc>(create: (context) => LogoutBloc()),
+        BlocProvider<UpdatingBloc>(create: (context) => UpdatingBloc()),
       ],
       child: MaterialApp(
         title: 'Konfirmasi Wilkerstat',

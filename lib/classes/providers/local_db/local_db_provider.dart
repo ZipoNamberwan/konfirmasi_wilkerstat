@@ -63,5 +63,23 @@ class LocalDbProvider {
       FOREIGN KEY(sls_id) REFERENCES sls(id) ON DELETE CASCADE
     );
   ''');
+
+    await db.execute('''
+    CREATE TABLE image_upload (
+      id TEXT PRIMARY KEY,
+      path TEXT NOT NULL,
+      sls_id TEXT NOT NULL,
+      FOREIGN KEY(sls_id) REFERENCES sls(id) ON DELETE CASCADE
+    );
+  ''');
+
+    await db.execute('''
+    CREATE TABLE sls_upload (
+      id TEXT PRIMARY KEY,
+      created_at TEXT NOT NULL,
+      sls_id TEXT NOT NULL,
+      FOREIGN KEY(sls_id) REFERENCES sls(id) ON DELETE CASCADE
+    );
+    ''');
   }
 }

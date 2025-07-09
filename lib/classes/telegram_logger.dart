@@ -8,13 +8,13 @@ class TelegramLogger {
   static final Dio _dio = Dio();
 
   static Future<void> send(String message) async {
-    // try {
-    //   await _dio.post(
-    //     'https://api.telegram.org/bot$_token/sendMessage',
-    //     data: {'chat_id': _chatId, 'text': message},
-    //   );
-    // } catch (e) {
-    //   // silent failure, do not throw
-    // }
+    try {
+      await _dio.post(
+        'https://api.telegram.org/bot$_token/sendMessage',
+        data: {'chat_id': _chatId, 'text': message},
+      );
+    } catch (e) {
+      // silent failure, do not throw
+    }
   }
 }

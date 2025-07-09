@@ -96,8 +96,8 @@ class BusinessStatus extends Equatable {
   const BusinessStatus._(this.key, this.text);
 
   static const notConfirmed = BusinessStatus._(1, 'Belum Dikonfirmasi');
-  static const found = BusinessStatus._(2, 'Ditemukan');
-  static const notFound = BusinessStatus._(3, 'Tidak Ditemukan');
+  static const found = BusinessStatus._(2, 'Ada');
+  static const notFound = BusinessStatus._(3, 'Tidak Ada');
 
   static const values = [notConfirmed, found, notFound];
 
@@ -121,16 +121,40 @@ class BusinessStatus extends Equatable {
 
   Color get color {
     if (this == BusinessStatus.notConfirmed) {
-      return Colors.grey[600]!;
+      return Colors.orange[600]!;
     } else if (this == BusinessStatus.found) {
       return Colors.green[600]!;
     } else if (this == BusinessStatus.notFound) {
       return Colors.red[600]!;
     } else {
-      return Colors.orange[600]!;
+      return Colors.grey[600]!;
     }
   }
 
   @override
   List<Object?> get props => [key, text];
+}
+
+class ImageUpload {
+  final String id;
+  final String slsId;
+  final String imagePath;
+
+  const ImageUpload({
+    required this.id,
+    required this.slsId,
+    required this.imagePath,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {'id': id, 'sls_id': slsId, 'image_path': imagePath};
+  }
+
+  factory ImageUpload.fromMap(Map<String, dynamic> map) {
+    return ImageUpload(
+      id: map['id'],
+      slsId: map['sls_id'],
+      imagePath: map['image_path'],
+    );
+  }
 }

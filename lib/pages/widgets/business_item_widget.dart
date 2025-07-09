@@ -3,7 +3,7 @@ import 'package:konfirmasi_wilkerstat/model/business.dart';
 
 class BusinessItemWidget extends StatelessWidget {
   final Business business;
-  final Function(BusinessStatus) onStatusChanged;
+  final Function(Business, BusinessStatus) onStatusChanged;
 
   const BusinessItemWidget({
     super.key,
@@ -122,11 +122,14 @@ class BusinessItemWidget extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // Background for selected side (only show if status is not null)
-                  if (business.status != null)
-                    AnimatedAlign(
-                      duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeInOut,
+                  // Background for selected side
+                  // Show bar only for confirmed statuses (found or notFound)
+                  // No bar for notConfirmed (null status)
+                  if (business.status == BusinessStatus.found ||
+                      business.status == BusinessStatus.notFound)
+                    Align(
+                      // duration: const Duration(milliseconds: 200),
+                      // curve: Curves.easeInOut,
                       alignment:
                           business.status == BusinessStatus.found
                               ? Alignment.centerLeft
@@ -158,7 +161,7 @@ class BusinessItemWidget extends StatelessWidget {
                       // Yes Button (Found)
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => onStatusChanged(BusinessStatus.found),
+                          onTap: () => onStatusChanged(business, BusinessStatus.found),
                           child: Container(
                             height: 36,
                             decoration: const BoxDecoration(
@@ -174,8 +177,7 @@ class BusinessItemWidget extends StatelessWidget {
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color:
-                                      business.status?.key ==
-                                              BusinessStatus.found.key
+                                      business.status == BusinessStatus.found
                                           ? Colors.white
                                           : Colors.grey[700],
                                 ),
@@ -188,7 +190,7 @@ class BusinessItemWidget extends StatelessWidget {
                       // No Button (Not Found)
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => onStatusChanged(BusinessStatus.notFound),
+                          onTap: () => onStatusChanged(business, BusinessStatus.notFound),
                           child: Container(
                             height: 36,
                             decoration: const BoxDecoration(
@@ -204,8 +206,7 @@ class BusinessItemWidget extends StatelessWidget {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color:
-                                      business.status?.key ==
-                                              BusinessStatus.notFound.key
+                                      business.status == BusinessStatus.notFound
                                           ? Colors.white
                                           : Colors.grey[700],
                                 ),

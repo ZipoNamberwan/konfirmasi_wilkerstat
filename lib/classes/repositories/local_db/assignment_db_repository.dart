@@ -115,7 +115,7 @@ class AssignmentDbRepository {
     await _provider.saveBusinesses(businessesJson);
   }
 
-  Future<void> updateBusinessStatus(String businessId, String status) async {
+  Future<void> updateBusinessStatus(String businessId, int status) async {
     await _provider.updateBusinessStatus(businessId, status);
   }
 
@@ -144,5 +144,13 @@ class AssignmentDbRepository {
     final Map<String, Village> villageMap = {for (var v in villages) v.id: v};
 
     return Sls.fromJsonWithVillageMap(slsJson, villageMap);
+  }
+
+  Future<Map<int, int>> getBusinessStatusSummaryBySls(String slsId) async {
+    return await _provider.getBusinessStatusSummaryBySls(slsId);
+  }
+
+  Future<Map<String, Map<int, int>>> getAllSlsBusinessStatusSummary() async {
+    return await _provider.getAllSlsBusinessStatusSummary();
   }
 }

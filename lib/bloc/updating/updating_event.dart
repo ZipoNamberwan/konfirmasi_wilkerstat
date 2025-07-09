@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:konfirmasi_wilkerstat/bloc/updating/updating_state.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 
 abstract class UpdatingEvent extends Equatable {
@@ -26,3 +27,14 @@ class ClearFilters extends UpdatingEvent {
   const ClearFilters();
 }
 
+class UpdateBusinessStatus extends UpdatingEvent {
+  final Business business;
+  final BusinessStatus status;
+
+  const UpdateBusinessStatus({required this.business, required this.status});
+}
+
+class SortByEvent extends UpdatingEvent {
+  final SortBy sortBy;
+  const SortByEvent({required this.sortBy});
+}

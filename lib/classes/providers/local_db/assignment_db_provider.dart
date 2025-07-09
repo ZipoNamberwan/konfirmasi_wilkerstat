@@ -182,7 +182,7 @@ class AssignmentDbProvider {
     );
   }
 
-  Future<void> updateBusinessStatus(String businessId, String status) async {
+  Future<void> updateBusinessStatus(String businessId, int status) async {
     await _dbProvider.db.update(
       'business',
       {'status': status},
@@ -203,5 +203,63 @@ class AssignmentDbProvider {
     } else {
       throw Exception('SLS with id $slsId not found');
     }
+  }
+
+  Future<Map<int, int>> getBusinessStatusSummaryBySls(String slsId) async {
+    final List<Map<String, dynamic>> result = await _dbProvider.db.rawQuery(
+      '''
+      SELECT 
+        status,
+        COUNT(*) as count
+      FROM business 
+      WHERE sls_id = ?
+      GROUP BY status
+    ''',
+      [slsId],
+    );
+
+    Map<int, int> statusCounts = {};
+
+    // Process the grouped results
+    for (final row in result) {
+      final status = row['status'] as int?;
+      final count = row['count'] as int;
+
+      final statusKey = status ?? 0; // Use 0 for null status instead of 'null'
+      statusCounts[statusKey] = count;
+    }
+
+    return statusCounts;
+  }
+
+  Future<Map<String, Map<int, int>>> getAllSlsBusinessStatusSummary() async {
+    final List<Map<String, dynamic>> result = await _dbProvider.db.rawQuery('''
+      SELECT 
+        sls_id,
+        status,
+        COUNT(*) as count
+      FROM business 
+      GROUP BY sls_id, status
+    ''');
+
+    Map<String, Map<int, int>> allSlsSummary = {};
+
+    // Process the grouped results
+    for (final row in result) {
+      final slsId = row['sls_id'] as String;
+      final status = row['status'] as int?;
+      final count = row['count'] as int;
+
+      final statusKey = status ?? 0; // Use 0 for null status
+
+      // Initialize the inner map if it doesn't exist
+      if (!allSlsSummary.containsKey(slsId)) {
+        allSlsSummary[slsId] = <int, int>{};
+      }
+
+      allSlsSummary[slsId]![statusKey] = count;
+    }
+
+    return allSlsSummary;
   }
 }

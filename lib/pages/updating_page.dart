@@ -557,7 +557,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.pop(context);
-                _showSendingProgressDialog(context);
+                _updatingProvider.add(const SendData());
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF667eea),
@@ -577,42 +577,6 @@ class _UpdatingPageState extends State<UpdatingPage> {
               ),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  void _showSendingProgressDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Mengirim data ke server...',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2D3748),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Harap tunggu sebentar',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
         );
       },
     );

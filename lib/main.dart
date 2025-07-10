@@ -8,6 +8,7 @@ import 'package:konfirmasi_wilkerstat/bloc/updating/updating_bloc.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/assignment_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/assignment_db_repository.dart';
+import 'package:konfirmasi_wilkerstat/classes/repositories/third_party_repository.dart';
 import 'pages/login_page.dart';
 
 void main() async {
@@ -20,6 +21,7 @@ Future<void> _initializeApp() async {
   await AuthRepository().init();
   await AssignmentDbRepository().init();
   await AssignmentRepository().init();
+  await ThirdPartyRepository().init();
 }
 
 class MyApp extends StatelessWidget {

@@ -38,3 +38,7 @@ class SortByEvent extends UpdatingEvent {
   final SortBy sortBy;
   const SortByEvent({required this.sortBy});
 }
+
+class SendData extends UpdatingEvent {
+  const SendData();
+}

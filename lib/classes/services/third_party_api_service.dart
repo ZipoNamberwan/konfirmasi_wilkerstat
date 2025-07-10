@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:konfirmasi_wilkerstat/classes/app_config.dart';
+import 'package:konfirmasi_wilkerstat/classes/services/dio_service.dart';
 import 'package:konfirmasi_wilkerstat/classes/telegram_logger.dart';
 
 /// Authentication types for 3rd party APIs
@@ -24,14 +25,14 @@ class ThirdPartyApiService {
 
   ThirdPartyApiService._internal();
 
-  late Dio _dio;
+  late Dio dio;
   bool _initialized = false;
 
   Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
 
-    _dio = Dio(
+    dio = Dio(
       BaseOptions(
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
@@ -44,22 +45,22 @@ class ThirdPartyApiService {
     );
 
     // Add interceptors
-    _dio.interceptors.add(
+    dio.interceptors.add(
       LogInterceptor(
         requestBody: true,
         responseBody: true,
         error: true,
-        logPrint: (obj) {
-          // Only log in debug mode
-          assert(() {
-            print('ThirdPartyAPI: $obj');
-            return true;
-          }());
-        },
+        // logPrint: (obj) {
+        //   // Only log in debug mode
+        //   assert(() {
+        //     print('ThirdPartyAPI: $obj');
+        //     return true;
+        //   }());
+        // },
       ),
     );
 
-    _dio.interceptors.add(
+    dio.interceptors.add(
       InterceptorsWrapper(
         onError: (error, handler) {
           _handleError(error);
@@ -70,7 +71,7 @@ class ThirdPartyApiService {
   }
 
   void dispose() {
-    _dio.close();
+    dio.close();
   }
 
   void _handleError(DioException error, [String serviceType = 'External']) {
@@ -93,6 +94,8 @@ class ThirdPartyApiService {
 
     // Send log to Telegram for monitoring
     _safeSendLog(error, userMessage, serviceType);
+
+    throw DataProviderException(userMessage);
 
     // Don't throw here, let the caller handle the exception
   }

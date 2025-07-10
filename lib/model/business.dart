@@ -67,6 +67,13 @@ class Business {
     };
   }
 
+  Map<String, dynamic> toJsonForUpload() {
+    return {
+      'id': id,
+      'status': status?.key,
+    };
+  }
+
   // Create a copy with modified properties
   Business copyWith({
     String? id,

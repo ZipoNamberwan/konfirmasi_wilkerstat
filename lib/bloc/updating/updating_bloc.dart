@@ -1,29 +1,27 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_state.dart';
 import 'package:konfirmasi_wilkerstat/classes/api_server_handler.dart';
+import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/assignment_db_repository.dart';
+import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/upload_db_repository.dart';
+import 'package:konfirmasi_wilkerstat/classes/repositories/third_party_repository.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
-// import 'dart:io';
-// import 'dart:convert';
-// import 'dart:typed_data';
-// import 'package:crypto/crypto.dart';
-// import 'package:encrypt/encrypt.dart' as encrypt;
-// import 'package:path_provider/path_provider.dart';
+import 'package:konfirmasi_wilkerstat/model/upload.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
-  UpdatingBloc()
-    : super(
-        Initializing(
-          data: UpdatingStateData(
-            businesses: [],
-            filteredBusinesses: [],
-            sortBy: SortBy.nameAsc,
-            summary: {},
-          ),
-        ),
-      ) {
+  final Uuid _uuid = const Uuid();
+
+  UpdatingBloc() : super(Initializing()) {
     on<Init>((event, emit) async {
+      emit(Initializing());
+
+      // Load initial data from local DB
       final businesses = await AssignmentDbRepository().getBusinessesBySls(
         event.slsId,
       );
@@ -36,6 +34,10 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
         sortBy: state.data.sortBy,
       );
 
+      final slsUploads = await UploadDbRepository().getSlsUploadBySlsId(
+        event.slsId,
+      );
+
       emit(
         UpdatingState(
           data: state.data.copyWith(
@@ -43,6 +45,7 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
             filteredBusinesses: sortedBusinesses,
             summary: summary,
             sls: sls,
+            slsUploads: slsUploads,
           ),
         ),
       );
@@ -159,93 +162,123 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
     on<SendData>((event, emit) async {
       await ApiServerHandler.run(
         action: () async {
-          // final user = AuthRepository().getUser();
-          // final gDriveRequest =
-          //     await ThirdPartyRepository().getGoogleDriveToken();
-          // final gDriveToken = gDriveRequest['access_token'] as String;
-          // final file = await _createJsonFile(
-          //   user?.email ?? '',
-          //   state.data.sls?.id ?? '',
-          //   state.data.businesses.length,
-          //   state.data.businesses,
-          // );
-          // final result = await ThirdPartyRepository().uploadFileToGoogleDrive(
-          //   token: gDriveToken,
-          //   filePath: file.path,
-          //   fileName: '${state.data.sls?.id}.json',
-          //   folderId: '1bKoOGTtL6niuogM6XNl1EpgizNgPeRQ6',
-          // );
-          // print(result);
+          emit(
+            UpdatingState(
+              data: state.data.copyWith(
+                isSendingToServer: true,
+                sendingMessage: 'Memulai pengiriman data...',
+              ),
+            ),
+          );
+          final user = AuthRepository().getUser();
+          final gDriveRequest =
+              await ThirdPartyRepository().getGoogleDriveToken();
+          final gDriveToken = gDriveRequest['access_token'] as String;
+
+          emit(
+            UpdatingState(
+              data: state.data.copyWith(sendingMessage: 'Membuat file JSON...'),
+            ),
+          );
+
+          final file = await _createJsonFile(
+            user?.email ?? '',
+            state.data.sls?.id ?? '',
+            state.data.businesses.length,
+            state.data.businesses,
+          );
+          emit(
+            UpdatingState(
+              data: state.data.copyWith(sendingMessage: 'Mengunggah file...'),
+            ),
+          );
+          await ThirdPartyRepository().uploadFileToGoogleDrive(
+            token: gDriveToken,
+            filePath: file.path,
+            fileName: '${state.data.sls?.id}.json',
+            folderId: '1bKoOGTtL6niuogM6XNl1EpgizNgPeRQ6',
+          );
+
+          await UploadDbRepository().saveSlsUpload(
+            SlsUpload(
+              id: _uuid.v4(),
+              createdAt: DateTime.now(),
+              slsId: state.data.sls?.id ?? '',
+            ),
+          );
+
+          final slsUploads = await UploadDbRepository().getSlsUploadBySlsId(
+            state.data.sls?.id ?? '',
+          );
+          emit(
+            SendDataSuccess(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                clearSendingMessage: true,
+                slsUploads: slsUploads,
+              ),
+            ),
+          );
         },
-        onLoginExpired: (e) {},
-        onDataProviderError: (e) {},
-        onOtherError: (e) {},
+        onLoginExpired: (e) {
+          emit(
+            TokenExpired(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                sendingMessage: null,
+              ),
+            ),
+          );
+        },
+        onDataProviderError: (e) {
+          emit(
+            SendDataFailed(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                sendingMessage: e.message,
+              ),
+            ),
+          );
+        },
+        onOtherError: (e) {
+          emit(
+            SendDataFailed(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                sendingMessage: 'Terjadi kesalahan: ${e.toString()}',
+              ),
+            ),
+          );
+        },
       );
     });
   }
 
-  // Future<File> _createJsonFile(
-  //   String email,
-  //   String slsId,
-  //   int total,
-  //   List<Business> businesses,
-  // ) async {
-  //   // 1. Get the app's document directory
-  //   final directory = await getApplicationDocumentsDirectory();
+  Future<File> _createJsonFile(
+    String email,
+    String slsId,
+    int total,
+    List<Business> businesses,
+  ) async {
+    // 1. Get the app's document directory
+    final directory = await getApplicationDocumentsDirectory();
 
-  //   // 2. Create full file path
-  //   final file = File('${directory.path}/$slsId.json');
+    // 2. Create full file path
+    final file = File('${directory.path}/$slsId.json');
 
-  //   final data = <String, dynamic>{};
-  //   data['user_id'] = email;
-  //   data['wilayah'] = slsId;
-  //   data['total'] = total;
-  //   data['data'] =
-  //       businesses.map((business) => business.toJsonForUpload()).toList();
+    final data = <String, dynamic>{};
+    data['user_id'] = email;
+    data['wilayah'] = slsId;
+    data['total'] = total;
+    data['data'] =
+        businesses.map((business) => business.toJsonForUpload()).toList();
 
-  //   // 3. Encode data to JSON string
-  //   final jsonString = jsonEncode(data);
+    // 3. Encode data to JSON string
+    final jsonString = jsonEncode(data);
 
-  //   // 4. Write the JSON string to file
-  //   return await file.writeAsString(jsonString);
-  // }
-
-  // String _encryptVillageId(String villageId) {
-  //   final secret = 'TqubAjeim3xjLf5AR6KCGWUQRjR0PQdK';
-
-  //   final hashed = sha256.convert(utf8.encode(secret)).toString();
-
-  //   List<int> hexToBytes(String hex) {
-  //     final result = <int>[];
-  //     for (var i = 0; i < hex.length; i += 2) {
-  //       result.add(int.parse(hex.substring(i, i + 2), radix: 16));
-  //     }
-  //     return result;
-  //   }
-
-  //   final keyBytes = hexToBytes(hashed.substring(0, 32)); // 16 bytes
-  //   final ivSourceBytes = hexToBytes(
-  //     hashed.substring(32, 48),
-  //   ); // 8 bytes only (matches JS)
-
-  //   // Pad IV to 16 bytes like CryptoJS does
-  //   final ivPadded = Uint8List(16)
-  //     ..setRange(0, ivSourceBytes.length, ivSourceBytes);
-
-  //   final key = encrypt.Key(Uint8List.fromList(keyBytes));
-  //   final iv = encrypt.IV(ivPadded);
-
-  //   final encrypter = encrypt.Encrypter(
-  //     encrypt.AES(key, mode: encrypt.AESMode.cbc),
-  //   );
-
-  //   final encrypted = encrypter.encrypt(villageId, iv: iv);
-
-  //   return encrypted.base64
-  //       .replaceAll('+', '-')
-  //       .replaceAll('/', '_')
-  //       .replaceAll(RegExp(r'=+$'), '');
-  // }
+    // 4. Write the JSON string to file
+    return await file.writeAsString(jsonString);
+  }
 
   /// Helper method to filter businesses based on keyword and status
   List<Business> _filterBusinesses({

@@ -63,7 +63,7 @@ class UploadDbRepository {
     // Fill in the actual uploads for SLS IDs that have them
     for (final map in rawData) {
       final slsUpload = SlsUpload.fromJson(map);
-      result[slsUpload.sls.id] = slsUpload;
+      result[slsUpload.slsId] = slsUpload;
     }
 
     return result;

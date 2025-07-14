@@ -29,4 +29,14 @@ class AssignmentProvider {
     );
     return response.data['data'];
   }
+
+  Future<List<dynamic>> downloadBusinessesBySls(
+    String slsId,
+  ) async {
+    final response = await _dioService.dio.get(
+      '/assignments/wilkerstat/sls/$slsId',
+    );
+    return response.data['data'];
+  }
+
 }

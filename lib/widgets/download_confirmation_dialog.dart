@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:konfirmasi_wilkerstat/bloc/project/project_bloc.dart';
+import 'package:konfirmasi_wilkerstat/bloc/project/project_state.dart';
 
 class DownloadConfirmationDialog extends StatelessWidget {
   final String title;
@@ -20,135 +23,172 @@ class DownloadConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              itemType == 'village' ? Icons.location_city : Icons.map_outlined,
-              color: Colors.white,
-              size: 20,
-            ),
+    return BlocConsumer<ProjectBloc, ProjectState>(
+      listener: (context, state) {
+        if (state is DownloadVillageDataSuccess ||
+            state is DownloadVillageDataFailed ||
+            state is DownloadSlsDataSuccess ||
+            state is DownloadSlsDataFailed) {
+          Navigator.of(context).pop();
+        }
+      },
+      builder: (context, state) {
+        final isDownloading =
+            state.data.isDownloadingVillage || state.data.isDownloadingSls;
+
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF2D3748),
-              ),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF667eea).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: const Color(0xFF667eea).withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  itemType == 'village'
-                      ? Icons.location_city_outlined
-                      : Icons.map_outlined,
-                  color: const Color(0xFF667eea),
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    itemName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2D3748),
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
+          title: Row(
             children: [
-              Icon(Icons.info_outline, size: 16, color: Colors.blue[600]),
-              const SizedBox(width: 6),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Icon(
+                  itemType == 'village'
+                      ? Icons.location_city
+                      : Icons.map_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Data akan diunduh dan disimpan secara lokal.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue[600],
-                    fontStyle: FontStyle.italic,
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2D3748),
                   ),
                 ),
               ),
             ],
           ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: onCancel ?? () => Navigator.of(context).pop(),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.grey[600],
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF667eea).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFF667eea).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      itemType == 'village'
+                          ? Icons.location_city_outlined
+                          : Icons.map_outlined,
+                      color: const Color(0xFF667eea),
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        itemName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2D3748),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: Colors.blue[600]),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Data akan diunduh dan disimpan secara lokal.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          child: const Text(
-            'Batal',
-            style: TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.of(context).pop();
-            onConfirm();
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF667eea),
-            foregroundColor: Colors.white,
-            elevation: 2,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+          actions: [
+            TextButton(
+              onPressed:
+                  isDownloading
+                      ? null
+                      : (onCancel ?? () => Navigator.of(context).pop()),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey[600],
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+              ),
+              child: const Text(
+                'Batal',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
             ),
-          ),
-          icon: const Icon(Icons.download, size: 16),
-          label: const Text(
-            'Unduh',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
+            ElevatedButton.icon(
+              onPressed: isDownloading ? null : onConfirm,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF667eea),
+                foregroundColor: Colors.white,
+                elevation: 2,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon:
+                  isDownloading
+                      ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                      : const Icon(Icons.download, size: 16),
+              label: Text(
+                isDownloading ? 'Mengunduh...' : 'Unduh',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

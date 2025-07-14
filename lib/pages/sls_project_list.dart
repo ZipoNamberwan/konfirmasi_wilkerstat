@@ -4,9 +4,11 @@ import 'package:konfirmasi_wilkerstat/bloc/project/project_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_state.dart';
 import 'package:konfirmasi_wilkerstat/classes/app_config.dart';
-  import 'package:konfirmasi_wilkerstat/pages/updating_page.dart';
+import 'package:konfirmasi_wilkerstat/pages/login_page.dart';
+import 'package:konfirmasi_wilkerstat/pages/updating_page.dart';
 import 'package:konfirmasi_wilkerstat/widgets/about_app_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/assignment_state_widgets.dart';
+import 'package:konfirmasi_wilkerstat/widgets/custom_snackbar.dart';
 import 'package:konfirmasi_wilkerstat/widgets/download_confirmation_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/downloading_assignments_widget.dart';
 import 'package:konfirmasi_wilkerstat/widgets/initializing_widget.dart';
@@ -141,16 +143,50 @@ class _SlsProjectListState extends State<SlsProjectList> {
     );
   }
 
-  void _handleSlsClick(sls) {
-    Navigator.of(context).push(
+  Future<void> _handleSlsClick(sls) async {
+    await Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => UpdatingPage(selectedSls: sls)),
     );
+
+    _projectBloc.add(UpdateLastUpdate());
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProjectBloc, ProjectState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is DownloadVillageDataSuccess) {
+          CustomSnackBar.show(
+            context,
+            message: 'Data desa berhasil diunduh',
+            type: SnackBarType.success,
+          );
+        } else if (state is DownloadVillageDataFailed) {
+          CustomSnackBar.show(
+            context,
+            message: 'Gagal mengunduh data desa: ${state.errorMessage}',
+            type: SnackBarType.error,
+          );
+        } else if (state is DownloadSlsDataSuccess) {
+          CustomSnackBar.show(
+            context,
+            message: 'Data SLS berhasil diunduh',
+            type: SnackBarType.success,
+          );
+        } else if (state is DownloadSlsDataFailed) {
+          CustomSnackBar.show(
+            context,
+            message: 'Gagal mengunduh data SLS: ${state.errorMessage}',
+            type: SnackBarType.error,
+          );
+        } else if (state is TokenExpired) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+        }
+      },
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -216,6 +252,8 @@ class _SlsProjectListState extends State<SlsProjectList> {
     // Check if app is initializing
     if (state is Initializing) {
       return const InitializingWidget();
+    } else if (state is InitializingError) {
+      return _buildInitializingErrorWidget(state.errorMessage);
     } else {
       // Check if data is empty (no villages or sls assigned)
       if (state.data.villages.isEmpty && state.data.sls.isEmpty) {
@@ -254,9 +292,99 @@ class _SlsProjectListState extends State<SlsProjectList> {
           villageSlsList: villageSlsList,
           onVillageDownload: _handleVillageDownload,
           onSlsDownload: _handleSlsDownload,
-          onSlsClick: _handleSlsClick, // Add this line
+          onSlsClick: _handleSlsClick,
+          latestSlsUploads: state.data.latestSlsUploads,
         );
       },
+    );
+  }
+
+  Widget _buildInitializingErrorWidget(String errorMessage) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 40,
+                color: Colors.red[600],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Gagal Memuat Aplikasi',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.red[700],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.withOpacity(0.2)),
+              ),
+              child: Text(
+                errorMessage,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.red[600],
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () {
+                _projectBloc.add(Init());
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF667eea),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon: const Icon(Icons.refresh, size: 20),
+              label: const Text(
+                'Coba Lagi',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () {
+                _showLogoutConfirmation();
+              },
+              child: Text(
+                'Logout',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

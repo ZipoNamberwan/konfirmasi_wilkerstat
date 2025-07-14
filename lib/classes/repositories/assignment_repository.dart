@@ -31,4 +31,16 @@ class AssignmentRepository {
         .map<Map<String, dynamic>>((item) => item as Map<String, dynamic>)
         .toList();
   }
+
+  Future<List<Map<String, dynamic>>> downloadBusinessesBySls(
+    String slsId,
+  ) async {
+    final businessesJson = await _assignmentProvider.downloadBusinessesBySls(
+      slsId,
+    );
+
+    return businessesJson
+        .map<Map<String, dynamic>>((item) => item as Map<String, dynamic>)
+        .toList();
+  }
 }

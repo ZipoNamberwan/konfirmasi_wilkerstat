@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:konfirmasi_wilkerstat/config/workflow_config.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
+import 'package:konfirmasi_wilkerstat/model/upload.dart';
 
 class UpdatingState extends Equatable {
   final UpdatingStateData data;
@@ -13,7 +14,37 @@ class UpdatingState extends Equatable {
 }
 
 class Initializing extends UpdatingState {
-  const Initializing({required super.data});
+  Initializing()
+    : super(
+        data: UpdatingStateData(
+          businesses: [],
+          filteredBusinesses: [],
+          sortBy: SortBy.nameAsc,
+          summary: {},
+          keywordFilter: null,
+          sls: null,
+          selectedStatusFilter: null,
+          isSendingToServer: false,
+          sendingMessage: null,
+          slsUploads: [],
+        ),
+      );
+}
+
+class TokenExpired extends UpdatingState {
+  const TokenExpired({required super.data});
+}
+
+class SendDataSuccessful extends UpdatingState {
+  const SendDataSuccessful({required super.data});
+}
+
+class SendDataSuccess extends UpdatingState {
+  const SendDataSuccess({required super.data});
+}
+
+class SendDataFailed extends UpdatingState {
+  const SendDataFailed({required super.data});
 }
 
 class UpdatingStateData {
@@ -24,6 +55,9 @@ class UpdatingStateData {
   final String? keywordFilter;
   final SortBy sortBy;
   final Map<int, int> summary;
+  final bool isSendingToServer;
+  final String? sendingMessage;
+  final List<SlsUpload> slsUploads;
 
   UpdatingStateData({
     this.sls,
@@ -33,6 +67,9 @@ class UpdatingStateData {
     this.keywordFilter,
     required this.sortBy,
     required this.summary,
+    required this.isSendingToServer,
+    this.sendingMessage,
+    required this.slsUploads,
   });
 
   UpdatingStateData copyWith({
@@ -45,6 +82,10 @@ class UpdatingStateData {
     bool clearKeywordFilter = false,
     SortBy? sortBy,
     Map<int, int>? summary,
+    bool? isSendingToServer,
+    String? sendingMessage,
+    bool? clearSendingMessage,
+    List<SlsUpload>? slsUploads,
   }) {
     return UpdatingStateData(
       sls: sls ?? this.sls,
@@ -58,6 +99,12 @@ class UpdatingStateData {
           clearKeywordFilter ? null : (keywordFilter ?? this.keywordFilter),
       sortBy: sortBy ?? this.sortBy,
       summary: summary ?? this.summary,
+      isSendingToServer: isSendingToServer ?? this.isSendingToServer,
+      sendingMessage:
+          clearSendingMessage ?? false
+              ? null
+              : (sendingMessage ?? this.sendingMessage),
+      slsUploads: slsUploads ?? this.slsUploads,
     );
   }
 

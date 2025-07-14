@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
+import 'package:konfirmasi_wilkerstat/model/upload.dart';
 import 'package:konfirmasi_wilkerstat/model/user.dart';
 import 'package:konfirmasi_wilkerstat/model/village.dart';
 
@@ -42,6 +43,18 @@ class DownloadVillageDataFailed extends ProjectState {
   });
 }
 
+class DownloadSlsDataSuccess extends ProjectState {
+  const DownloadSlsDataSuccess({required super.data});
+}
+
+class DownloadSlsDataFailed extends ProjectState {
+  final String errorMessage;
+  const DownloadSlsDataFailed({
+    required super.data,
+    required this.errorMessage,
+  });
+}
+
 class TokenExpired extends ProjectState {
   const TokenExpired({required super.data});
 }
@@ -53,12 +66,19 @@ class ProjectStateData {
   final List<Sls> sls;
   final User? user;
 
+  final bool isDownloadingVillage;
+  final bool isDownloadingSls;
+  final Map<String, SlsUpload?> latestSlsUploads;
+
   ProjectStateData({
     required this.villages,
     required this.sls,
     required this.isInitializing,
     required this.isDownloadingAssignments,
     this.user,
+    required this.isDownloadingVillage,
+    required this.isDownloadingSls,
+    required this.latestSlsUploads,
   });
 
   ProjectStateData copyWith({
@@ -67,6 +87,9 @@ class ProjectStateData {
     bool? isInitializing,
     bool? isDownloadingAssignments,
     User? user,
+    bool? isDownloadingVillage,
+    bool? isDownloadingSls,
+    Map<String, SlsUpload?>? latestSlsUploads,
   }) {
     return ProjectStateData(
       villages: villages ?? this.villages,
@@ -75,6 +98,9 @@ class ProjectStateData {
       isDownloadingAssignments:
           isDownloadingAssignments ?? this.isDownloadingAssignments,
       user: user ?? this.user,
+      isDownloadingVillage: isDownloadingVillage ?? this.isDownloadingVillage,
+      isDownloadingSls: isDownloadingSls ?? this.isDownloadingSls,
+      latestSlsUploads: latestSlsUploads ?? this.latestSlsUploads,
     );
   }
 }

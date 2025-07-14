@@ -5,12 +5,14 @@ class SlsItemWidget extends StatelessWidget {
   final Sls sls;
   final Function(Sls) onSlsDownload;
   final Function(Sls)? onSlsClick;
+  final DateTime? lastSentAt;
 
   const SlsItemWidget({
     super.key,
     required this.sls,
     required this.onSlsDownload,
     this.onSlsClick,
+    this.lastSentAt,
   });
 
   @override
@@ -61,21 +63,50 @@ class SlsItemWidget extends StatelessWidget {
               size: 16,
             ),
           ),
-          title: Text(
-            sls.name,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color:
-                  slsIsDownloaded ? const Color(0xFF2D3748) : Colors.grey[600],
-            ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  sls.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color:
+                        slsIsDownloaded
+                            ? const Color(0xFF2D3748)
+                            : Colors.grey[600],
+                  ),
+                ),
+              ),
+            ],
           ),
-          subtitle: Text(
-            sls.code,
-            style: TextStyle(
-              color: slsIsDownloaded ? Colors.grey[600] : Colors.grey[500],
-              fontSize: 12,
-            ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                sls.code,
+                style: TextStyle(
+                  color: slsIsDownloaded ? Colors.grey[600] : Colors.grey[500],
+                  fontSize: 12,
+                ),
+              ),
+              if (slsIsDownloaded) ...[
+                const SizedBox(height: 2),
+                Text(
+                  lastSentAt != null
+                      ? _formatDate(lastSentAt!)
+                      : 'Belum dikirim',
+                  style: TextStyle(
+                    color:
+                        lastSentAt != null
+                            ? Colors.green[600]
+                            : Colors.orange[600],
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ],
           ),
           trailing:
               !slsIsDownloaded
@@ -88,5 +119,32 @@ class SlsItemWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    String dateStr;
+    if (difference.inDays == 0) {
+      // Today - show time
+      final hour = dateTime.hour.toString().padLeft(2, '0');
+      final minute = dateTime.minute.toString().padLeft(2, '0');
+      dateStr = 'hari ini $hour:$minute';
+    } else if (difference.inDays == 1) {
+      // Yesterday
+      dateStr = 'kemarin';
+    } else if (difference.inDays < 7) {
+      // This week
+      dateStr = '${difference.inDays} hari lalu';
+    } else {
+      // Older than a week - show date
+      final day = dateTime.day.toString().padLeft(2, '0');
+      final month = dateTime.month.toString().padLeft(2, '0');
+      final year = dateTime.year;
+      dateStr = '$day/$month/$year';
+    }
+
+    return 'Dikirim pada: $dateStr';
   }
 }

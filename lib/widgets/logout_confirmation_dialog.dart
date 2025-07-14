@@ -4,6 +4,7 @@ import 'package:konfirmasi_wilkerstat/bloc/login/logout_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/login/logout_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/login/logout_state.dart';
 import 'package:konfirmasi_wilkerstat/pages/login_page.dart';
+import 'package:konfirmasi_wilkerstat/widgets/custom_snackbar.dart';
 
 class LogoutConfirmationDialog extends StatelessWidget {
   const LogoutConfirmationDialog({super.key});
@@ -19,9 +20,11 @@ class LogoutConfirmationDialog extends StatelessWidget {
             (route) => false,
           );
         } else if (state is LogoutFailed) {
-          ScaffoldMessenger.of(
+          CustomSnackBar.show(
             context,
-          ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
+            message: state.errorMessage,
+            type: SnackBarType.error,
+          );
         }
       },
       builder: (context, state) {

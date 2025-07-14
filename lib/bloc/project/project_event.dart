@@ -29,4 +29,6 @@ class DownloadSlsData extends ProjectEvent {
   const DownloadSlsData({required this.slsId});
 }
 
-
+class UpdateLastUpdate extends ProjectEvent {
+  const UpdateLastUpdate();
+}

@@ -35,12 +35,17 @@ class ThirdPartyProvider {
   Future<List<Map<String, dynamic>>> getBusinessByVillageViaCloudflare(
     String encryptedVillageId,
   ) async {
+    final url = 'https://sls-kendedes-1.pages.dev/api/$encryptedVillageId.json';
     final response = await _dioService.dio.get(
-      'https://sls-kendedes-1.pages.dev/api/$encryptedVillageId.json',
+      url,
       options: Options(headers: {'Accept': 'application/json'}),
     );
 
-    return response.data as List<Map<String, dynamic>>;
+    final data = response.data;
+    // return response.data as List<Map<String, dynamic>>;
+    return data
+        .map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e))
+        .toList();
   }
 
   /// Upload a file to Google Drive using their official API

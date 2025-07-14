@@ -6,10 +6,12 @@ import 'package:konfirmasi_wilkerstat/bloc/updating/updating_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_state.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
-import 'package:konfirmasi_wilkerstat/pages/widgets/business_item_widget.dart';
-import 'package:konfirmasi_wilkerstat/pages/widgets/sls_info_dialog.dart';
-import 'package:konfirmasi_wilkerstat/pages/widgets/prerequisites_popup.dart';
-import 'package:konfirmasi_wilkerstat/pages/widgets/camera_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/business_item_widget.dart';
+import 'package:konfirmasi_wilkerstat/widgets/custom_snackbar.dart';
+import 'package:konfirmasi_wilkerstat/widgets/sls_info_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/prerequisites_popup.dart';
+import 'package:konfirmasi_wilkerstat/widgets/camera_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/send_confirmation_dialog.dart';
 
 class UpdatingPage extends StatefulWidget {
   final Sls selectedSls;
@@ -38,8 +40,63 @@ class _UpdatingPageState extends State<UpdatingPage> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<UpdatingBloc, UpdatingState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is SendDataSuccess) {
+          CustomSnackBar.showSuccess(context, message: 'Data berhasil dikirim');
+        } else if (state is SendDataFailed) {
+          CustomSnackBar.showError(context, message: 'Gagal mengirim data');
+        }
+      },
       builder: (context, state) {
+        if (state is Initializing) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                widget.selectedSls.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              backgroundColor: const Color(0xFF667eea),
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.white),
+            ),
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF667eea), Color(0xFFF8F9FA)],
+                  stops: [0.0, 0.3],
+                ),
+              ),
+              child: const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF667eea),
+                      ),
+                      strokeWidth: 3,
+                    ),
+                    SizedBox(height: 24),
+                    Text(
+                      'Memuat data usaha...',
+                      style: TextStyle(
+                        color: Color(0xFF2D3748),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
         return Scaffold(
           appBar: AppBar(
             title: Column(
@@ -487,96 +544,12 @@ class _UpdatingPageState extends State<UpdatingPage> {
   void _showSendConfirmationDialog(BuildContext context) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF667eea).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.cloud_upload_outlined,
-                  color: Color(0xFF667eea),
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Text(
-                  'Kirim Data ke Server',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF2D3748),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Apakah Anda yakin ingin mengirim semua data konfirmasi usaha ke server?',
-                style: TextStyle(fontSize: 14, color: Color(0xFF4A5568)),
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Data yang akan dikirim:',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF2D3748),
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '• Status konfirmasi semua usaha\n• Informasi SLS yang dipilih\n• Data update terbaru',
-                style: TextStyle(fontSize: 13, color: Color(0xFF4A5568)),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Batal',
-                style: TextStyle(
-                  color: Color(0xFF718096),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                _updatingProvider.add(const SendData());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF667eea),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              icon: const Icon(Icons.send, size: 16),
-              label: const Text(
-                'Kirim',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
+        return SendConfirmationDialog(
+          onConfirm: () {
+            _updatingProvider.add(const SendData());
+          },
         );
       },
     );
@@ -594,7 +567,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
     if (isFirstStepDone && (!isSecondStepNeeded || isSecondStepDone)) {
       // All required steps completed - Green
       circleColor = Colors.green[400]!;
-      buttonIcon = Icons.check_circle;
+      buttonIcon = Icons.send;
       tooltip =
           isSecondStepNeeded
               ? 'Siap untuk dikirim'

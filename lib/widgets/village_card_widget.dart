@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:konfirmasi_wilkerstat/model/upload.dart';
 import 'package:konfirmasi_wilkerstat/model/village.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
 import 'sls_item_widget.dart';
@@ -9,6 +10,7 @@ class VillageCardWidget extends StatelessWidget {
   final Function(Village) onVillageDownload;
   final Function(Sls) onSlsDownload;
   final Function(Sls)? onSlsClick;
+  final Map<String, SlsUpload?> latestSlsUploads;
 
   const VillageCardWidget({
     super.key,
@@ -17,6 +19,7 @@ class VillageCardWidget extends StatelessWidget {
     required this.onVillageDownload,
     required this.onSlsDownload,
     this.onSlsClick,
+    required this.latestSlsUploads,
   });
 
   @override
@@ -201,8 +204,9 @@ class VillageCardWidget extends StatelessWidget {
               ...villageSlsList.map((sls) {
                 return SlsItemWidget(
                   sls: sls,
-                  onSlsDownload: onSlsDownload,
+                  onSlsDownload: hasAnyDownloadedSls ? onSlsDownload : (sls) {},
                   onSlsClick: onSlsClick,
+                  lastSentAt: latestSlsUploads[sls.id]?.createdAt,
                 );
               }),
               const SizedBox(height: 6),

@@ -3,7 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/project/project_state.dart';
+import 'package:konfirmasi_wilkerstat/bloc/version/version_bloc.dart';
+import 'package:konfirmasi_wilkerstat/bloc/version/version_event.dart';
+import 'package:konfirmasi_wilkerstat/bloc/version/version_state.dart';
 import 'package:konfirmasi_wilkerstat/classes/app_config.dart';
+import 'package:konfirmasi_wilkerstat/model/version.dart';
 import 'package:konfirmasi_wilkerstat/pages/login_page.dart';
 import 'package:konfirmasi_wilkerstat/pages/updating_page.dart';
 import 'package:konfirmasi_wilkerstat/widgets/about_app_dialog.dart';
@@ -13,6 +17,7 @@ import 'package:konfirmasi_wilkerstat/widgets/download_confirmation_dialog.dart'
 import 'package:konfirmasi_wilkerstat/widgets/downloading_assignments_widget.dart';
 import 'package:konfirmasi_wilkerstat/widgets/initializing_widget.dart';
 import 'package:konfirmasi_wilkerstat/widgets/user_info_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/version_update_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/village_card_widget.dart';
 import 'package:konfirmasi_wilkerstat/widgets/logout_confirmation_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,6 +34,8 @@ class _SlsProjectListState extends State<SlsProjectList> {
   @override
   void initState() {
     super.initState();
+    context.read<VersionBloc>().add(CheckVersion());
+
     _projectBloc = context.read<ProjectBloc>()..add(Init());
   }
 
@@ -151,98 +158,125 @@ class _SlsProjectListState extends State<SlsProjectList> {
     _projectBloc.add(UpdateLastUpdate());
   }
 
+  void _showVersionUpdateDialog(BuildContext context, Version? newVersion) {
+    if (newVersion != null) {
+      showDialog(
+        context: context,
+        barrierDismissible: !newVersion.isMandatory,
+        builder:
+            (ctx) => VersionUpdateDialog(
+              version: newVersion,
+              onUpdate: () async {
+                final updateUrl = newVersion.url ?? AppConfig.updateUrl;
+                _openUrl(updateUrl);
+              },
+            ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ProjectBloc, ProjectState>(
-      listener: (context, state) {
-        if (state is DownloadVillageDataSuccess) {
-          CustomSnackBar.show(
-            context,
-            message: 'Data desa berhasil diunduh',
-            type: SnackBarType.success,
-          );
-        } else if (state is DownloadVillageDataFailed) {
-          CustomSnackBar.show(
-            context,
-            message: 'Gagal mengunduh data desa: ${state.errorMessage}',
-            type: SnackBarType.error,
-          );
-        } else if (state is DownloadSlsDataSuccess) {
-          CustomSnackBar.show(
-            context,
-            message: 'Data SLS berhasil diunduh',
-            type: SnackBarType.success,
-          );
-        } else if (state is DownloadSlsDataFailed) {
-          CustomSnackBar.show(
-            context,
-            message: 'Gagal mengunduh data SLS: ${state.errorMessage}',
-            type: SnackBarType.error,
-          );
-        } else if (state is TokenExpired) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-            (route) => false,
-          );
+    return BlocConsumer<VersionBloc, VersionState>(
+      listener: (context, versionState) {
+        if (versionState is UpdateNotification) {
+          _showVersionUpdateDialog(context, versionState.data.newVersion);
         }
       },
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.account_circle, color: Colors.white),
-              onPressed: () {
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return UserInfoDialog(
-                      user: state.data.user,
-                      onLogout: () {
-                        _showLogoutConfirmation();
+      builder: (context, versionState) {
+        return BlocConsumer<ProjectBloc, ProjectState>(
+          listener: (context, state) {
+            if (state is DownloadVillageDataSuccess) {
+              CustomSnackBar.show(
+                context,
+                message: 'Data desa berhasil diunduh',
+                type: SnackBarType.success,
+              );
+            } else if (state is DownloadVillageDataFailed) {
+              CustomSnackBar.show(
+                context,
+                message: 'Gagal mengunduh data desa: ${state.errorMessage}',
+                type: SnackBarType.error,
+              );
+            } else if (state is DownloadSlsDataSuccess) {
+              CustomSnackBar.show(
+                context,
+                message: 'Data SLS berhasil diunduh',
+                type: SnackBarType.success,
+              );
+            } else if (state is DownloadSlsDataFailed) {
+              CustomSnackBar.show(
+                context,
+                message: 'Gagal mengunduh data SLS: ${state.errorMessage}',
+                type: SnackBarType.error,
+              );
+            } else if (state is TokenExpired) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+                (route) => false,
+              );
+            }
+          },
+          builder: (context, state) {
+            return Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.account_circle, color: Colors.white),
+                  onPressed: () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return UserInfoDialog(
+                          user: state.data.user,
+                          onLogout: () {
+                            _showLogoutConfirmation();
+                          },
+                        );
                       },
                     );
                   },
-                );
-              },
-            ),
-            title: const Text(
-              'Daftar Assignment',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            backgroundColor: const Color(0xFF667eea),
-            elevation: 0,
-            centerTitle: true,
-            actions: [
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert, color: Colors.white),
-                color: Colors.white,
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                offset: const Offset(0, 50),
-                onSelected: (String value) {
-                  _handleMenuSelection(value);
-                },
-                itemBuilder: (BuildContext context) => _buildPopupMenuItems(),
+                title: const Text(
+                  'Daftar Assignment',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                backgroundColor: const Color(0xFF667eea),
+                elevation: 0,
+                centerTitle: true,
+                actions: [
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
+                    color: Colors.white,
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    offset: const Offset(0, 50),
+                    onSelected: (String value) {
+                      _handleMenuSelection(value);
+                    },
+                    itemBuilder:
+                        (BuildContext context) => _buildPopupMenuItems(),
+                  ),
+                ],
               ),
-            ],
-          ),
-          body: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color(0xFF667eea), Color(0xFFF8F9FA)],
-                stops: [0.0, 0.3],
+              body: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF667eea), Color(0xFFF8F9FA)],
+                    stops: [0.0, 0.3],
+                  ),
+                ),
+                child: _buildBodyContent(context, state),
               ),
-            ),
-            child: _buildBodyContent(context, state),
-          ),
+            );
+          },
         );
       },
     );
@@ -310,7 +344,7 @@ class _SlsProjectListState extends State<SlsProjectList> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -333,9 +367,9 @@ class _SlsProjectListState extends State<SlsProjectList> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.05),
+                color: Colors.red.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.red.withOpacity(0.2)),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
               ),
               child: Text(
                 errorMessage,

@@ -37,7 +37,7 @@ class AboutAppDialog extends StatelessWidget {
 
             // App Name
             const Text(
-              'Konfirmasi Wilkerstat',
+              'LERES PAK',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

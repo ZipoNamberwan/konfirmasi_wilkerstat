@@ -2,8 +2,8 @@
 import 'package:dio/dio.dart';
 
 class TelegramLogger {
-  static const String _token = '7701155934:AAF0KR0wxFGlwkOjZ8zOV8tk0gQcDagLFug';
-  static const String _chatId = '-4976940750'; // group ID
+  static const String _token = '7650669494:AAEmJYC5TLslZ5W7l121FgvfV3tyXJvqcpw';
+  static const String _chatId = '-4961166858'; // group ID
 
   static final Dio _dio = Dio();
 

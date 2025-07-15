@@ -140,7 +140,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
                                 // App Name
                                 Text(
-                                  'Konfirmasi Wilkerstat',
+                                  'LERES PAK',
                                   style: Theme.of(
                                     context,
                                   ).textTheme.headlineSmall?.copyWith(

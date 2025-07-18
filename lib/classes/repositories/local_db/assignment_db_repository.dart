@@ -111,6 +111,14 @@ class AssignmentDbRepository {
     await _provider.updateSlsLockedStatus(slsId, locked);
   }
 
+  Future<void> updateSlsLocation(
+    String slsId,
+    double? latitude,
+    double? longitude,
+  ) async {
+    await _provider.updateSlsLocation(slsId, latitude, longitude);
+  }
+
   Future<void> saveBusinesses(List<Business> businesses) async {
     final businessesJson =
         businesses.map((business) => business.toJson()).toList();

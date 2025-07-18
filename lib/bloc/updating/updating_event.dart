@@ -24,7 +24,9 @@ class FilterByStatus extends UpdatingEvent {
 }
 
 class ClearFilters extends UpdatingEvent {
-  const ClearFilters();
+  final bool? clearKeyword;
+  final bool? clearStatus;
+  const ClearFilters({this.clearKeyword = false, this.clearStatus = false});
 }
 
 class UpdateBusinessStatus extends UpdatingEvent {
@@ -46,4 +48,8 @@ class SendData extends UpdatingEvent {
 class UpdateSlsLockedStatus extends UpdatingEvent {
   final bool locked;
   const UpdateSlsLockedStatus({required this.locked});
+}
+
+class UpdateSlsLocation extends UpdatingEvent {
+  const UpdateSlsLocation();
 }

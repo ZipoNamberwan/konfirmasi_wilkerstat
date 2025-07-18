@@ -168,6 +168,19 @@ class AssignmentDbProvider {
     );
   }
 
+  Future<void> updateSlsLocation(
+    String slsId,
+    double? latitude,
+    double? longitude,
+  ) async {
+    await _dbProvider.db.update(
+      'sls',
+      {'latitude': latitude, 'longitude': longitude},
+      where: 'id = ?',
+      whereArgs: [slsId],
+    );
+  }
+
   Future<void> saveBusinesses(List<Map<String, dynamic>> businesses) async {
     final batch = _dbProvider.db.batch();
 

@@ -93,14 +93,9 @@ class SlsItemWidget extends StatelessWidget {
               if (slsIsDownloaded) ...[
                 const SizedBox(height: 2),
                 Text(
-                  lastSentAt != null
-                      ? _formatDate(lastSentAt!)
-                      : 'Belum dikirim',
+                  _getSentStatusText(),
                   style: TextStyle(
-                    color:
-                        lastSentAt != null
-                            ? Colors.green[600]
-                            : Colors.orange[600],
+                    color: _getSentStatusColor(),
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -119,6 +114,26 @@ class SlsItemWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getSentStatusText() {
+    if (lastSentAt == null) {
+      return 'Belum dikirim';
+    } else if (sls.locked) {
+      return _formatDate(lastSentAt!);
+    } else {
+      return 'Ada data yang berubah, namun belum dikirim kembali';
+    }
+  }
+
+  Color _getSentStatusColor() {
+    if (lastSentAt == null) {
+      return Colors.orange[600]!;
+    } else if (sls.locked) {
+      return Colors.green[600]!;
+    } else {
+      return Colors.red[600]!;
+    }
   }
 
   String _formatDate(DateTime dateTime) {

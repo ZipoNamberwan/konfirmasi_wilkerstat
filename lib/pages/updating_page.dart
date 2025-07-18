@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_bloc.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_state.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
+import 'package:konfirmasi_wilkerstat/pages/login_page.dart';
 import 'package:konfirmasi_wilkerstat/widgets/business_item_widget.dart';
 import 'package:konfirmasi_wilkerstat/widgets/custom_snackbar.dart';
+import 'package:konfirmasi_wilkerstat/widgets/location_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/message_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/sls_info_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/prerequisites_popup.dart';
-import 'package:konfirmasi_wilkerstat/widgets/camera_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/send_confirmation_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/unlock_confirmation_dialog.dart';
 
@@ -25,16 +26,25 @@ class UpdatingPage extends StatefulWidget {
 
 class _UpdatingPageState extends State<UpdatingPage> {
   late final UpdatingBloc _updatingProvider;
-
+  late final TextEditingController _searchController;
   @override
   void initState() {
     super.initState();
     _updatingProvider =
         context.read<UpdatingBloc>()..add(Init(slsId: widget.selectedSls.id));
+    _searchController = TextEditingController();
+    _searchController.addListener(() {
+      if (_searchController.text.isNotEmpty) {
+        _updatingProvider.add(FilterByKeyword(keyword: _searchController.text));
+      } else {
+        _updatingProvider.add(ClearFilters(clearKeyword: true));
+      }
+    });
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -49,6 +59,25 @@ class _UpdatingPageState extends State<UpdatingPage> {
         } else if (state is SlsUnlocked) {
           Navigator.pop(context);
           CustomSnackBar.showSuccess(context, message: 'SLS berhasil diunlock');
+        } else if (state is TokenExpired) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+          );
+        } else if (state is MockupLocationDetected) {
+          showDialog(
+            context: context,
+            builder:
+                (context) => MessageDialog(
+                  title: 'Fake GPS Terdeteksi',
+                  message:
+                      'Kami mendeteksi bahwa Anda menggunakan aplikasi Fake GPS. '
+                      'Silakan matikan aplikasi tersebut untuk melanjutkan tagging.',
+                  type: MessageType.error,
+                  buttonText: 'Tutup',
+                ),
+          );
         }
       },
       builder: (context, state) {
@@ -201,14 +230,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                         height: 40,
                         child: TextField(
                           enabled: !state.data.sls.locked,
-                          onChanged:
-                              state.data.sls.locked
-                                  ? null
-                                  : (value) {
-                                    _updatingProvider.add(
-                                      FilterByKeyword(keyword: value),
-                                    );
-                                  },
+                          controller: _searchController,
                           decoration: InputDecoration(
                             hintText: 'Cari usaha...',
                             hintStyle: TextStyle(
@@ -226,6 +248,30 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                       : const Color(0xFF718096),
                               size: 20,
                             ),
+                            suffixIcon:
+                                state.data.keywordFilter?.isNotEmpty == true
+                                    ? IconButton(
+                                      onPressed:
+                                          state.data.sls.locked
+                                              ? null
+                                              : () {
+                                                _searchController.clear();
+                                                _updatingProvider.add(
+                                                  ClearFilters(
+                                                    clearKeyword: true,
+                                                  ),
+                                                );
+                                              },
+                                      icon: Icon(
+                                        Icons.clear,
+                                        size: 18,
+                                        color:
+                                            state.data.sls.locked
+                                                ? Colors.grey[400]
+                                                : Colors.grey[600],
+                                      ),
+                                    )
+                                    : null,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
@@ -352,14 +398,15 @@ class _UpdatingPageState extends State<UpdatingPage> {
                             ),
                           ),
                           // Clear filter button
-                          if (state.data.selectedStatusFilter != null ||
-                              state.data.keywordFilter != null)
+                          if (state.data.selectedStatusFilter != null)
                             GestureDetector(
                               onTap:
                                   state.data.sls.locked
                                       ? null
                                       : () {
-                                        _updatingProvider.add(ClearFilters());
+                                        _updatingProvider.add(
+                                          ClearFilters(clearStatus: true),
+                                        );
                                       },
                               child: Container(
                                 margin: const EdgeInsets.only(left: 6),
@@ -616,8 +663,8 @@ class _UpdatingPageState extends State<UpdatingPage> {
               FilterByStatus(status: BusinessStatus.notConfirmed),
             );
           },
-          onShowCamera: () {
-            _showCameraDialog(context);
+          onGetLocation: () {
+            _showLocationDialog(context);
           },
           onSendData: () {
             _showSendConfirmationDialog(context);
@@ -625,67 +672,6 @@ class _UpdatingPageState extends State<UpdatingPage> {
         );
       },
     );
-  }
-
-  void _showCameraDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CameraDialog(onTakePicture: _takePicture);
-      },
-    );
-  }
-
-  void _takePicture() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 1800,
-        maxHeight: 1800,
-        imageQuality: 60,
-      );
-
-      if (!mounted) return;
-
-      if (image != null) {
-        // String? _capturedImagePath = image.path;
-
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Foto berhasil diambil: ${image.name}'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      } else {
-        // User cancelled the camera
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Pengambilan foto dibatalkan'),
-            backgroundColor: Colors.orange,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      // Handle any errors
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error mengambil foto: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
-      );
-    }
   }
 
   void _showSlsInfo() {
@@ -724,6 +710,19 @@ class _UpdatingPageState extends State<UpdatingPage> {
         return SendConfirmationDialog(
           onConfirm: () {
             _updatingProvider.add(const SendData());
+          },
+        );
+      },
+    );
+  }
+
+  void _showLocationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return LocationDialog(
+          onGetLocation: () {
+            _updatingProvider.add(UpdateSlsLocation());
           },
         );
       },

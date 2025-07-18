@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_event.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_state.dart';
 import 'package:konfirmasi_wilkerstat/classes/api_server_handler.dart';
@@ -11,6 +12,7 @@ import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/upload_db_re
 import 'package:konfirmasi_wilkerstat/classes/repositories/third_party_repository.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/upload.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -74,6 +76,23 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
       );
     });
 
+    on<SortByEvent>((event, emit) async {
+      // Apply the new sort to the currently filtered businesses
+      final sortedBusinesses = _sortBusinesses(
+        businesses: state.data.filteredBusinesses,
+        sortBy: event.sortBy,
+      );
+
+      emit(
+        UpdatingState(
+          data: state.data.copyWith(
+            filteredBusinesses: sortedBusinesses,
+            sortBy: event.sortBy,
+          ),
+        ),
+      );
+    });
+
     on<FilterByStatus>((event, emit) async {
       final filteredBusinesses = _filterBusinesses(
         businesses: state.data.businesses,
@@ -103,8 +122,16 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
 
     on<ClearFilters>((event, emit) async {
       // Apply current sort to all businesses (no filters)
-      final sortedBusinesses = _sortBusinesses(
+      final filteredBusinesses = _filterBusinesses(
         businesses: state.data.businesses,
+        keyword: event.clearKeyword ?? false ? null : state.data.keywordFilter,
+        status:
+            event.clearStatus ?? false ? null : state.data.selectedStatusFilter,
+      );
+
+      // Apply current sort to filtered results
+      final sortedBusinesses = _sortBusinesses(
+        businesses: filteredBusinesses,
         sortBy: state.data.sortBy,
       );
 
@@ -112,8 +139,8 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
         UpdatingState(
           data: state.data.copyWith(
             filteredBusinesses: sortedBusinesses,
-            clearKeywordFilter: true,
-            clearSelectedStatusFilter: true,
+            clearKeywordFilter: event.clearKeyword ?? false,
+            clearSelectedStatusFilter: event.clearStatus ?? false,
           ),
         ),
       );
@@ -210,6 +237,7 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
             user?.email ?? '',
             state.data.sls.id,
             state.data.businesses.length,
+            state.data.sls.slsChiefLocation,
             state.data.businesses,
           );
           emit(
@@ -282,12 +310,77 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
         },
       );
     });
+
+    on<UpdateSlsLocation>((event, emit) async {
+      emit(GettingLocation(data: state.data.copyWith(isGettingLocation: true)));
+
+      try {
+        Position position = await _getCurrentPosition();
+
+        if (position.isMocked) {
+          emit(
+            MockupLocationDetected(
+              data: state.data.copyWith(isGettingLocation: false),
+            ),
+          );
+          return;
+        }
+
+        await AssignmentDbRepository().updateSlsLocation(
+          state.data.sls.id,
+          position.latitude,
+          position.longitude,
+        );
+
+        final updatedSls = state.data.sls.copyWith(
+          slsChiefLocation: LatLng(position.latitude, position.longitude),
+        );
+
+        // Update current location in state
+        emit(
+          SlsLocationUpdated(
+            data: state.data.copyWith(
+              sls: updatedSls,
+              isGettingLocation: false,
+            ),
+          ),
+        );
+      } catch (e) {
+        emit(
+          SlsLocationFailed(
+            errorMessage: e.toString(),
+            data: state.data.copyWith(isGettingLocation: false),
+          ),
+        );
+      }
+    });
+  }
+
+  Future<Position> _getCurrentPosition() async {
+    // Check location permission
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permission denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Location permission permanently denied');
+    }
+
+    // Get current position
+    return await Geolocator.getCurrentPosition(
+      locationSettings: LocationSettings(accuracy: LocationAccuracy.best),
+    );
   }
 
   Future<File> _createJsonFile(
     String email,
     String slsId,
     int total,
+    LatLng? slsChiefLocation,
     List<Business> businesses,
   ) async {
     // 1. Get the app's document directory
@@ -300,6 +393,8 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
     data['user_id'] = email;
     data['wilayah'] = slsId;
     data['total'] = total;
+    data['latitude'] = slsChiefLocation?.latitude;
+    data['longitude'] = slsChiefLocation?.longitude;
     data['data'] =
         businesses.map((business) => business.toJsonForUpload()).toList();
 

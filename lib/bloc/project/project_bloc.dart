@@ -290,14 +290,14 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     });
 
     on<UpdateLastUpdate>((event, emit) async {
-      final sls = state.data.sls;
+      final sls = await AssignmentDbRepository().getActiveSls();
       final latestUploads = await UploadDbRepository().getLatestSlsUploads(
         sls.map((s) => s.id).toList(),
       );
 
       emit(
         ProjectState(
-          data: state.data.copyWith(latestSlsUploads: latestUploads),
+          data: state.data.copyWith(latestSlsUploads: latestUploads, sls: sls),
         ),
       );
     });

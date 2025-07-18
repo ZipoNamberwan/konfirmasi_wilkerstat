@@ -43,6 +43,7 @@ class Initializing extends UpdatingState {
           sendingMessage: null,
           slsUploads: [],
           isUnlockingSls: false,
+          isGettingLocation: false,
         ),
       );
 }
@@ -67,6 +68,23 @@ class SlsUnlocked extends UpdatingState {
   const SlsUnlocked({required super.data});
 }
 
+class GettingLocation extends UpdatingState {
+  const GettingLocation({required super.data});
+}
+
+class SlsLocationUpdated extends UpdatingState {
+  const SlsLocationUpdated({required super.data});
+}
+
+class SlsLocationFailed extends UpdatingState {
+  final String errorMessage;
+  const SlsLocationFailed({required this.errorMessage, required super.data});
+}
+
+class MockupLocationDetected extends UpdatingState {
+  const MockupLocationDetected({required super.data});
+}
+
 class UpdatingStateData {
   final Sls sls;
   final List<Business> businesses;
@@ -79,6 +97,7 @@ class UpdatingStateData {
   final String? sendingMessage;
   final List<SlsUpload> slsUploads;
   final bool isUnlockingSls;
+  final bool isGettingLocation;
 
   UpdatingStateData({
     required this.sls,
@@ -92,6 +111,7 @@ class UpdatingStateData {
     this.sendingMessage,
     required this.slsUploads,
     required this.isUnlockingSls,
+    required this.isGettingLocation,
   });
 
   UpdatingStateData copyWith({
@@ -109,6 +129,7 @@ class UpdatingStateData {
     bool? clearSendingMessage,
     List<SlsUpload>? slsUploads,
     bool? isUnlockingSls,
+    bool? isGettingLocation,
   }) {
     return UpdatingStateData(
       sls: sls ?? this.sls,
@@ -129,6 +150,7 @@ class UpdatingStateData {
               : (sendingMessage ?? this.sendingMessage),
       slsUploads: slsUploads ?? this.slsUploads,
       isUnlockingSls: isUnlockingSls ?? this.isUnlockingSls,
+      isGettingLocation: isGettingLocation ?? this.isGettingLocation,
     );
   }
 
@@ -148,9 +170,8 @@ class UpdatingStateData {
     // If second step is not needed, consider it always done
     if (!isSecondStepNeeded()) return true;
 
-    // TODO: Implement actual logic for when second step is completed
     // This could check if photos are uploaded, etc.
-    return true; // Currently hardcoded as done
+    return sls.slsChiefLocation != null; // Currently hardcoded as done
   }
 
   bool isSecondStepNeeded() {

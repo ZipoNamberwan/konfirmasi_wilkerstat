@@ -6,7 +6,7 @@ class WorkflowConfig {
   // Change this value to switch between workflow modes:
   // - true: Two-step workflow (business confirmation + photo upload)
   // - false: One-step workflow (business confirmation only)
-  static const bool enablePhotoUploadStep = false;
+  static const bool enablePhotoUploadStep = true;
   // =============================================
 
   /// Returns whether the photo upload step is needed in the workflow

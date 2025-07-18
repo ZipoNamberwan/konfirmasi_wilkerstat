@@ -1,4 +1,5 @@
 import 'package:konfirmasi_wilkerstat/model/village.dart';
+import 'package:latlong2/latlong.dart';
 
 class Sls {
   final String id;
@@ -8,6 +9,7 @@ class Sls {
   final bool isDeleted;
   final bool hasDownloaded;
   final bool locked;
+  final LatLng? slsChiefLocation;
 
   Sls({
     required this.id,
@@ -17,6 +19,7 @@ class Sls {
     required this.isDeleted,
     required this.hasDownloaded,
     required this.locked,
+    this.slsChiefLocation,
   });
 
   // Create Sls from JSON
@@ -29,6 +32,10 @@ class Sls {
       isDeleted: (json['is_deleted'] ?? 0) == 1,
       hasDownloaded: (json['has_downloaded'] ?? 0) == 1,
       locked: (json['locked'] ?? 0) == 1,
+      slsChiefLocation:
+          json['latitude'] != null && json['longitude'] != null
+              ? LatLng(json['latitude'], json['longitude'])
+              : null,
     );
   }
 
@@ -46,6 +53,10 @@ class Sls {
       isDeleted: (json['is_deleted'] ?? 0) == 1,
       hasDownloaded: (json['has_downloaded'] ?? 0) == 1,
       locked: (json['locked'] ?? 0) == 1,
+      slsChiefLocation:
+          json['latitude'] != null && json['longitude'] != null
+              ? LatLng(json['latitude'], json['longitude'])
+              : null,
     );
   }
 
@@ -59,6 +70,8 @@ class Sls {
       'is_deleted': isDeleted ? 1 : 0,
       'has_downloaded': hasDownloaded ? 1 : 0,
       'locked': locked ? 1 : 0,
+      'latitude': slsChiefLocation?.latitude,
+      'longitude': slsChiefLocation?.longitude,
     };
   }
 
@@ -72,6 +85,7 @@ class Sls {
     bool? isDeleted,
     bool? hasDownloaded,
     bool? locked,
+    LatLng? slsChiefLocation,
   }) {
     return Sls(
       id: id ?? this.id,
@@ -81,6 +95,7 @@ class Sls {
       isDeleted: isDeleted ?? this.isDeleted,
       hasDownloaded: hasDownloaded ?? this.hasDownloaded,
       locked: locked ?? this.locked,
+      slsChiefLocation: slsChiefLocation ?? this.slsChiefLocation,
     );
   }
 }

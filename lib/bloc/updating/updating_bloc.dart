@@ -119,6 +119,31 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
       );
     });
 
+    on<UpdateSlsLockedStatus>((event, emit) async {
+      emit(UpdatingState(data: state.data.copyWith(isUnlockingSls: true)));
+      final slsId = state.data.sls.id;
+      await AssignmentDbRepository().updateSlsLockedStatus(slsId, event.locked);
+      if (event.locked) {
+        emit(
+          UpdatingState(
+            data: state.data.copyWith(
+              sls: state.data.sls.copyWith(locked: event.locked),
+              isUnlockingSls: false,
+            ),
+          ),
+        );
+      } else {
+        emit(
+          SlsUnlocked(
+            data: state.data.copyWith(
+              sls: state.data.sls.copyWith(locked: event.locked),
+              isUnlockingSls: false,
+            ),
+          ),
+        );
+      }
+    });
+
     on<UpdateBusinessStatus>((event, emit) async {
       await AssignmentDbRepository().updateBusinessStatus(
         event.business.id,
@@ -183,7 +208,7 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
 
           final file = await _createJsonFile(
             user?.email ?? '',
-            state.data.sls?.id ?? '',
+            state.data.sls.id,
             state.data.businesses.length,
             state.data.businesses,
           );
@@ -195,7 +220,7 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
           await ThirdPartyRepository().uploadFileToGoogleDrive(
             token: gDriveToken,
             filePath: file.path,
-            fileName: '${state.data.sls?.id}.json',
+            fileName: '${state.data.sls.id}.json',
             folderId: '1bKoOGTtL6niuogM6XNl1EpgizNgPeRQ6',
           );
 
@@ -203,12 +228,16 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
             SlsUpload(
               id: _uuid.v4(),
               createdAt: DateTime.now(),
-              slsId: state.data.sls?.id ?? '',
+              slsId: state.data.sls.id,
             ),
+          );
+          await AssignmentDbRepository().updateSlsLockedStatus(
+            state.data.sls.id,
+            true,
           );
 
           final slsUploads = await UploadDbRepository().getSlsUploadBySlsId(
-            state.data.sls?.id ?? '',
+            state.data.sls.id,
           );
           emit(
             SendDataSuccess(
@@ -216,6 +245,7 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
                 isSendingToServer: false,
                 clearSendingMessage: true,
                 slsUploads: slsUploads,
+                sls: state.data.sls.copyWith(locked: true),
               ),
             ),
           );

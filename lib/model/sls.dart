@@ -7,6 +7,7 @@ class Sls {
   final Village village;
   final bool isDeleted;
   final bool hasDownloaded;
+  final bool locked;
 
   Sls({
     required this.id,
@@ -15,6 +16,7 @@ class Sls {
     required this.village,
     required this.isDeleted,
     required this.hasDownloaded,
+    required this.locked,
   });
 
   // Create Sls from JSON
@@ -26,6 +28,7 @@ class Sls {
       village: Village.fromJson(json['village'] as Map<String, dynamic>),
       isDeleted: (json['is_deleted'] ?? 0) == 1,
       hasDownloaded: (json['has_downloaded'] ?? 0) == 1,
+      locked: (json['locked'] ?? 0) == 1,
     );
   }
 
@@ -42,6 +45,7 @@ class Sls {
       village: villageMap[villageId]!,
       isDeleted: (json['is_deleted'] ?? 0) == 1,
       hasDownloaded: (json['has_downloaded'] ?? 0) == 1,
+      locked: (json['locked'] ?? 0) == 1,
     );
   }
 
@@ -54,6 +58,7 @@ class Sls {
       'village_id': village.id,
       'is_deleted': isDeleted ? 1 : 0,
       'has_downloaded': hasDownloaded ? 1 : 0,
+      'locked': locked ? 1 : 0,
     };
   }
 
@@ -66,6 +71,7 @@ class Sls {
     Village? village,
     bool? isDeleted,
     bool? hasDownloaded,
+    bool? locked,
   }) {
     return Sls(
       id: id ?? this.id,
@@ -74,6 +80,7 @@ class Sls {
       village: village ?? this.village,
       isDeleted: isDeleted ?? this.isDeleted,
       hasDownloaded: hasDownloaded ?? this.hasDownloaded,
+      locked: locked ?? this.locked,
     );
   }
 }

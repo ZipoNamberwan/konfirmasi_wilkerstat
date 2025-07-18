@@ -42,3 +42,8 @@ class SortByEvent extends UpdatingEvent {
 class SendData extends UpdatingEvent {
   const SendData();
 }
+
+class UpdateSlsLockedStatus extends UpdatingEvent {
+  final bool locked;
+  const UpdateSlsLockedStatus({required this.locked});
+}

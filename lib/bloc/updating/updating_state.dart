@@ -3,6 +3,7 @@ import 'package:konfirmasi_wilkerstat/config/workflow_config.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
 import 'package:konfirmasi_wilkerstat/model/upload.dart';
+import 'package:konfirmasi_wilkerstat/model/village.dart';
 
 class UpdatingState extends Equatable {
   final UpdatingStateData data;
@@ -22,11 +23,26 @@ class Initializing extends UpdatingState {
           sortBy: SortBy.nameAsc,
           summary: {},
           keywordFilter: null,
-          sls: null,
+          sls: Sls(
+            id: '',
+            code: '',
+            name: '',
+            village: Village(
+              id: '',
+              code: '',
+              name: '',
+              hasDownloaded: false,
+              isDeleted: false,
+            ),
+            isDeleted: false,
+            hasDownloaded: false,
+            locked: false,
+          ),
           selectedStatusFilter: null,
           isSendingToServer: false,
           sendingMessage: null,
           slsUploads: [],
+          isUnlockingSls: false,
         ),
       );
 }
@@ -47,8 +63,12 @@ class SendDataFailed extends UpdatingState {
   const SendDataFailed({required super.data});
 }
 
+class SlsUnlocked extends UpdatingState {
+  const SlsUnlocked({required super.data});
+}
+
 class UpdatingStateData {
-  final Sls? sls;
+  final Sls sls;
   final List<Business> businesses;
   final List<Business> filteredBusinesses;
   final BusinessStatus? selectedStatusFilter;
@@ -58,9 +78,10 @@ class UpdatingStateData {
   final bool isSendingToServer;
   final String? sendingMessage;
   final List<SlsUpload> slsUploads;
+  final bool isUnlockingSls;
 
   UpdatingStateData({
-    this.sls,
+    required this.sls,
     required this.businesses,
     required this.filteredBusinesses,
     this.selectedStatusFilter,
@@ -70,6 +91,7 @@ class UpdatingStateData {
     required this.isSendingToServer,
     this.sendingMessage,
     required this.slsUploads,
+    required this.isUnlockingSls,
   });
 
   UpdatingStateData copyWith({
@@ -86,6 +108,7 @@ class UpdatingStateData {
     String? sendingMessage,
     bool? clearSendingMessage,
     List<SlsUpload>? slsUploads,
+    bool? isUnlockingSls,
   }) {
     return UpdatingStateData(
       sls: sls ?? this.sls,
@@ -105,6 +128,7 @@ class UpdatingStateData {
               ? null
               : (sendingMessage ?? this.sendingMessage),
       slsUploads: slsUploads ?? this.slsUploads,
+      isUnlockingSls: isUnlockingSls ?? this.isUnlockingSls,
     );
   }
 

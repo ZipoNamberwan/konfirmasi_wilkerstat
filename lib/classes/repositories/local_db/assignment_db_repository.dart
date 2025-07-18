@@ -48,10 +48,9 @@ class AssignmentDbRepository {
         code: json['short_code'] as String,
         name: json['name'] as String,
         village: villageMap[villageId]!,
-        isDeleted:
-            json['is_deleted'] == 1, // Assuming is_deleted is stored as INTEGER
-        hasDownloaded:
-            json['has_downloaded'] == 1, // Assuming has_downloaded is INTEGER
+        isDeleted: json['is_deleted'] == 1,
+        hasDownloaded: json['has_downloaded'] == 1,
+        locked: json['locked'] == 1,
       );
     }).toList();
   }
@@ -74,10 +73,9 @@ class AssignmentDbRepository {
         code: json['short_code'] as String,
         name: json['name'] as String,
         village: villageMap[villageId]!,
-        isDeleted:
-            json['is_deleted'] == 1, // Assuming is_deleted is stored as INTEGER
-        hasDownloaded:
-            json['has_downloaded'] == 1, // Assuming has_downloaded is INTEGER
+        isDeleted: json['is_deleted'] == 1,
+        hasDownloaded: json['has_downloaded'] == 1,
+        locked: json['locked'] == 1,
       );
     }).toList();
   }
@@ -107,6 +105,10 @@ class AssignmentDbRepository {
 
   Future<void> updateSlsDownloadStatus(String slsId, bool hasDownloaded) async {
     await _provider.updateSlsDownloadStatus(slsId, hasDownloaded);
+  }
+
+  Future<void> updateSlsLockedStatus(String slsId, bool locked) async {
+    await _provider.updateSlsLockedStatus(slsId, locked);
   }
 
   Future<void> saveBusinesses(List<Business> businesses) async {

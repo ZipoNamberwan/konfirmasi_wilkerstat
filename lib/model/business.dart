@@ -45,6 +45,7 @@ class Business {
         ),
         isDeleted: false,
         hasDownloaded: false,
+        locked: false,
       ),
       status:
           (() {
@@ -68,10 +69,7 @@ class Business {
   }
 
   Map<String, dynamic> toJsonForUpload() {
-    return {
-      'id': id,
-      'status': status?.key,
-    };
+    return {'id': id, 'status': status?.key};
   }
 
   // Create a copy with modified properties

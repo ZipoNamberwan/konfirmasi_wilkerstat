@@ -4,11 +4,13 @@ import 'package:konfirmasi_wilkerstat/model/business.dart';
 class BusinessItemWidget extends StatelessWidget {
   final Business business;
   final Function(Business, BusinessStatus) onStatusChanged;
+  final bool isLocked;
 
   const BusinessItemWidget({
     super.key,
     required this.business,
     required this.onStatusChanged,
+    this.isLocked = false,
   });
 
   @override
@@ -46,12 +48,19 @@ class BusinessItemWidget extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: business.status?.color.withValues(alpha: 0.1),
+                    color:
+                        isLocked
+                            ? Colors.grey[200]
+                            : business.status?.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                     border: Border.all(
                       color:
-                          business.status?.color.withValues(alpha: 0.3) ??
-                          Colors.grey[600]!,
+                          isLocked
+                              ? Colors.grey[400]!
+                              : (business.status?.color.withValues(
+                                    alpha: 0.3,
+                                  ) ??
+                                  Colors.grey[600]!),
                     ),
                   ),
                   child: Text(
@@ -59,7 +68,10 @@ class BusinessItemWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: FontWeight.w600,
-                      color: business.status?.color ?? Colors.grey[600]!,
+                      color:
+                          isLocked
+                              ? Colors.grey[600]!
+                              : (business.status?.color ?? Colors.grey[600]!),
                     ),
                   ),
                 ),
@@ -117,8 +129,10 @@ class BusinessItemWidget extends StatelessWidget {
               height: 36,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.grey[300]!),
-                color: Colors.grey[50],
+                border: Border.all(
+                  color: isLocked ? Colors.grey[200]! : Colors.grey[300]!,
+                ),
+                color: isLocked ? Colors.grey[100] : Colors.grey[50],
               ),
               child: Stack(
                 children: [
@@ -141,16 +155,23 @@ class BusinessItemWidget extends StatelessWidget {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
                           color:
-                              business.status == BusinessStatus.found
-                                  ? Colors.green[600]
-                                  : Colors.red[600],
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                              isLocked
+                                  ? Colors.grey[400]
+                                  : (business.status == BusinessStatus.found
+                                      ? Colors.green[600]
+                                      : Colors.red[600]),
+                          boxShadow:
+                              isLocked
+                                  ? []
+                                  : [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                         ),
                       ),
                     ),
@@ -161,7 +182,13 @@ class BusinessItemWidget extends StatelessWidget {
                       // Yes Button (Found)
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => onStatusChanged(business, BusinessStatus.found),
+                          onTap:
+                              isLocked
+                                  ? null
+                                  : () => onStatusChanged(
+                                    business,
+                                    BusinessStatus.found,
+                                  ),
                           child: Container(
                             height: 36,
                             decoration: const BoxDecoration(
@@ -177,9 +204,15 @@ class BusinessItemWidget extends StatelessWidget {
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                   color:
-                                      business.status == BusinessStatus.found
-                                          ? Colors.white
-                                          : Colors.grey[700],
+                                      isLocked
+                                          ? (business.status ==
+                                                  BusinessStatus.found
+                                              ? Colors.white70
+                                              : Colors.grey[500])
+                                          : (business.status ==
+                                                  BusinessStatus.found
+                                              ? Colors.white
+                                              : Colors.grey[700]),
                                 ),
                               ),
                             ),
@@ -190,7 +223,13 @@ class BusinessItemWidget extends StatelessWidget {
                       // No Button (Not Found)
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => onStatusChanged(business, BusinessStatus.notFound),
+                          onTap:
+                              isLocked
+                                  ? null
+                                  : () => onStatusChanged(
+                                    business,
+                                    BusinessStatus.notFound,
+                                  ),
                           child: Container(
                             height: 36,
                             decoration: const BoxDecoration(
@@ -206,9 +245,15 @@ class BusinessItemWidget extends StatelessWidget {
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color:
-                                      business.status == BusinessStatus.notFound
-                                          ? Colors.white
-                                          : Colors.grey[700],
+                                      isLocked
+                                          ? (business.status ==
+                                                  BusinessStatus.notFound
+                                              ? Colors.white70
+                                              : Colors.grey[500])
+                                          : (business.status ==
+                                                  BusinessStatus.notFound
+                                              ? Colors.white
+                                              : Colors.grey[700]),
                                 ),
                               ),
                             ),

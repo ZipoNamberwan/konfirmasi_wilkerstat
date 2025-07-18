@@ -84,19 +84,19 @@ class SlsInfoDialog extends StatelessWidget {
                               _buildCleanInfoRow(
                                 icon: Icons.apartment,
                                 label: 'SLS',
-                                value: state.data.sls?.name ?? '',
+                                value: state.data.sls.name,
                               ),
                               const SizedBox(height: 12),
                               _buildCleanInfoRow(
                                 icon: Icons.location_city,
                                 label: 'Desa/Kelurahan',
-                                value: state.data.sls?.village.name ?? '',
+                                value: state.data.sls.village.name,
                               ),
                               const SizedBox(height: 12),
                               _buildCleanInfoRow(
                                 icon: Icons.qr_code,
                                 label: 'Kode SLS',
-                                value: state.data.sls?.code ?? '',
+                                value: state.data.sls.code,
                               ),
                             ],
                           ),

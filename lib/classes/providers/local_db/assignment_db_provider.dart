@@ -44,7 +44,9 @@ class AssignmentDbProvider {
         'short_code': sl['short_code'],
         'name': sl['name'],
         'village_id': sl['village_id'],
-        'has_downloaded': (sl['hasDownloaded'] ?? false) ? 1 : 0,
+        'has_downloaded':
+            (sl['hasDownloaded'] == true || sl['hasDownloaded'] == 1) ? 1 : 0,
+        'locked': (sl['locked'] == true || sl['locked'] == 1) ? 1 : 0,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
 
@@ -152,6 +154,15 @@ class AssignmentDbProvider {
     await _dbProvider.db.update(
       'sls',
       {'has_downloaded': hasDownloaded ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [slsId],
+    );
+  }
+
+  Future<void> updateSlsLockedStatus(String slsId, bool locked) async {
+    await _dbProvider.db.update(
+      'sls',
+      {'locked': locked ? 1 : 0},
       where: 'id = ?',
       whereArgs: [slsId],
     );

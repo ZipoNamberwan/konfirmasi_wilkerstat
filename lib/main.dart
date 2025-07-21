@@ -104,7 +104,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<VersionBloc>(create: (context) => VersionBloc()),
       ],
       child: MaterialApp(
-        title: 'LERES PAK',
+        title: 'KEN AROK',
         debugShowCheckedModeBanner: false,
         home: const LoginPage(),
       ),

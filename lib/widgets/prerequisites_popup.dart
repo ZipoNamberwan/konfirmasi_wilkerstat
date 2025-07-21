@@ -111,7 +111,7 @@ class PrerequisitesPopup extends StatelessWidget {
                       state.data.isSecondStepDone()
                           ? null
                           : () {
-                            Navigator.pop(context);
+                            // Navigator.pop(context);
                             onGetLocation();
                           },
                   locationText:
@@ -121,7 +121,7 @@ class PrerequisitesPopup extends StatelessWidget {
                   onRetakeLocation:
                       state.data.sls.slsChiefLocation != null
                           ? () {
-                            Navigator.pop(context);
+                            // Navigator.pop(context);
                             onGetLocation();
                           }
                           : null,

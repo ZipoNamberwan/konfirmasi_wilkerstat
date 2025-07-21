@@ -10,7 +10,12 @@ class LocationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UpdatingBloc, UpdatingState>(
+    return BlocConsumer<UpdatingBloc, UpdatingState>(
+      listener: (context, state) {
+        if (state is SlsLocationUpdated) {
+          Navigator.pop(context);
+        }
+      },
       builder: (context, state) {
         return AlertDialog(
           shape: RoundedRectangleBorder(

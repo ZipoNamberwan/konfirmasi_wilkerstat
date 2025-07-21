@@ -37,7 +37,7 @@ class AboutAppDialog extends StatelessWidget {
 
             // App Name
             const Text(
-              'LERES PAK',
+              'KEN AROK',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

@@ -1,4 +1,4 @@
-package com.example.konfirmasi_wilkerstat
+package kenarok.douwes.dekker
 
 import io.flutter.embedding.android.FlutterActivity
 

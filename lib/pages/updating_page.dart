@@ -25,19 +25,19 @@ class UpdatingPage extends StatefulWidget {
 }
 
 class _UpdatingPageState extends State<UpdatingPage> {
-  late final UpdatingBloc _updatingProvider;
+  late final UpdatingBloc _updatingBloc;
   late final TextEditingController _searchController;
   @override
   void initState() {
     super.initState();
-    _updatingProvider =
+    _updatingBloc =
         context.read<UpdatingBloc>()..add(Init(slsId: widget.selectedSls.id));
     _searchController = TextEditingController();
     _searchController.addListener(() {
       if (_searchController.text.isNotEmpty) {
-        _updatingProvider.add(FilterByKeyword(keyword: _searchController.text));
+        _updatingBloc.add(FilterByKeyword(keyword: _searchController.text));
       } else {
-        _updatingProvider.add(ClearFilters(clearKeyword: true));
+        _updatingBloc.add(ClearFilters(clearKeyword: true));
       }
     });
   }
@@ -256,7 +256,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                               ? null
                                               : () {
                                                 _searchController.clear();
-                                                _updatingProvider.add(
+                                                _updatingBloc.add(
                                                   ClearFilters(
                                                     clearKeyword: true,
                                                   ),
@@ -331,7 +331,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                         state.data.sls.locked
                                             ? null
                                             : () {
-                                              _updatingProvider.add(
+                                              _updatingBloc.add(
                                                 FilterByStatus(status: null),
                                               );
                                             },
@@ -347,7 +347,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                         state.data.sls.locked
                                             ? null
                                             : () {
-                                              _updatingProvider.add(
+                                              _updatingBloc.add(
                                                 FilterByStatus(
                                                   status: BusinessStatus.found,
                                                 ),
@@ -365,7 +365,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                         state.data.sls.locked
                                             ? null
                                             : () {
-                                              _updatingProvider.add(
+                                              _updatingBloc.add(
                                                 FilterByStatus(
                                                   status:
                                                       BusinessStatus.notFound,
@@ -384,7 +384,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                         state.data.sls.locked
                                             ? null
                                             : () {
-                                              _updatingProvider.add(
+                                              _updatingBloc.add(
                                                 FilterByStatus(
                                                   status:
                                                       BusinessStatus
@@ -404,7 +404,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                   state.data.sls.locked
                                       ? null
                                       : () {
-                                        _updatingProvider.add(
+                                        _updatingBloc.add(
                                           ClearFilters(clearStatus: true),
                                         );
                                       },
@@ -490,7 +490,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                 isLocked: state.data.sls.locked,
                                 onStatusChanged: (bsn, status) {
                                   if (!state.data.sls.locked) {
-                                    _updatingProvider.add(
+                                    _updatingBloc.add(
                                       UpdateBusinessStatus(
                                         business: bsn,
                                         status: status,
@@ -638,7 +638,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
               !isLocked)
             TextButton(
               onPressed: () {
-                _updatingProvider.add(ClearFilters());
+                _updatingBloc.add(ClearFilters());
               },
               child: const Text(
                 'Reset Filter',
@@ -659,7 +659,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
       builder: (BuildContext context) {
         return PrerequisitesPopup(
           onFilterNotConfirmed: () {
-            _updatingProvider.add(
+            _updatingBloc.add(
               FilterByStatus(status: BusinessStatus.notConfirmed),
             );
           },
@@ -695,7 +695,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
         return _SortModalContent(
           selectedSortBy: selectedSortBy,
           onSortSelected: (sortBy) {
-            _updatingProvider.add(SortByEvent(sortBy: sortBy));
+            _updatingBloc.add(SortByEvent(sortBy: sortBy));
           },
         );
       },
@@ -709,24 +709,22 @@ class _UpdatingPageState extends State<UpdatingPage> {
       builder: (BuildContext context) {
         return SendConfirmationDialog(
           onConfirm: () {
-            _updatingProvider.add(const SendData());
+            _updatingBloc.add(const SendData());
           },
         );
       },
     );
   }
 
-  void _showLocationDialog(BuildContext context) {
-    showDialog(
+  Future<void> _showLocationDialog(BuildContext context) async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return LocationDialog(
-          onGetLocation: () {
-            _updatingProvider.add(UpdateSlsLocation());
-          },
-        );
+        return LocationDialog();
       },
     );
+
+    _updatingBloc.add(ResetFormChiefSlsInfo());
   }
 
   Widget _buildStatusButton(
@@ -801,7 +799,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
   }
 
   void _unlockSls() {
-    _updatingProvider.add(UpdateSlsLockedStatus(locked: false));
+    _updatingBloc.add(UpdateSlsLockedStatus(locked: false));
   }
 }
 

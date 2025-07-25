@@ -51,6 +51,8 @@ class LocalDbProvider {
       locked INTEGER NOT NULL DEFAULT 0,
       latitude REAL,
       longitude REAL,
+      sls_chief_name TEXT,
+      sls_chief_phone TEXT,
       FOREIGN KEY(village_id) REFERENCES village(id) ON DELETE CASCADE
     );
   ''');

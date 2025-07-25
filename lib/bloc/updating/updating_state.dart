@@ -4,6 +4,7 @@ import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
 import 'package:konfirmasi_wilkerstat/model/upload.dart';
 import 'package:konfirmasi_wilkerstat/model/village.dart';
+import 'package:latlong2/latlong.dart';
 
 class UpdatingState extends Equatable {
   final UpdatingStateData data;
@@ -44,6 +45,10 @@ class Initializing extends UpdatingState {
           slsUploads: [],
           isUnlockingSls: false,
           isGettingLocation: false,
+          slsChiefName: null,
+          slsChiefPhone: null,
+          slsChiefLocation: null,
+          isSaveLoading: false,
         ),
       );
 }
@@ -85,6 +90,15 @@ class MockupLocationDetected extends UpdatingState {
   const MockupLocationDetected({required super.data});
 }
 
+class SaveSlsInfoSuccess extends UpdatingState {
+  const SaveSlsInfoSuccess({required super.data});
+}
+
+class SaveSlsInfoError extends UpdatingState {
+  final String errorMessage;
+  const SaveSlsInfoError({required this.errorMessage, required super.data});
+}
+
 class UpdatingStateData {
   final Sls sls;
   final List<Business> businesses;
@@ -99,6 +113,12 @@ class UpdatingStateData {
   final bool isUnlockingSls;
   final bool isGettingLocation;
 
+  // Form Attributes
+  final String? slsChiefName;
+  final String? slsChiefPhone;
+  final LatLng? slsChiefLocation;
+  final bool isSaveLoading;
+
   UpdatingStateData({
     required this.sls,
     required this.businesses,
@@ -112,6 +132,10 @@ class UpdatingStateData {
     required this.slsUploads,
     required this.isUnlockingSls,
     required this.isGettingLocation,
+    this.slsChiefName,
+    this.slsChiefPhone,
+    this.slsChiefLocation,
+    required this.isSaveLoading,
   });
 
   UpdatingStateData copyWith({
@@ -130,6 +154,11 @@ class UpdatingStateData {
     List<SlsUpload>? slsUploads,
     bool? isUnlockingSls,
     bool? isGettingLocation,
+    String? slsChiefName,
+    String? slsChiefPhone,
+    LatLng? slsChiefLocation,
+    bool? resetForm,
+    bool? isSaveLoading,
   }) {
     return UpdatingStateData(
       sls: sls ?? this.sls,
@@ -151,6 +180,16 @@ class UpdatingStateData {
       slsUploads: slsUploads ?? this.slsUploads,
       isUnlockingSls: isUnlockingSls ?? this.isUnlockingSls,
       isGettingLocation: isGettingLocation ?? this.isGettingLocation,
+
+      slsChiefName:
+          resetForm ?? false ? null : (slsChiefName ?? this.slsChiefName),
+      slsChiefPhone:
+          resetForm ?? false ? null : (slsChiefPhone ?? this.slsChiefPhone),
+      slsChiefLocation:
+          resetForm ?? false
+              ? null
+              : (slsChiefLocation ?? this.slsChiefLocation),
+      isSaveLoading: isSaveLoading ?? this.isSaveLoading,
     );
   }
 
@@ -171,7 +210,9 @@ class UpdatingStateData {
     if (!isSecondStepNeeded()) return true;
 
     // This could check if photos are uploaded, etc.
-    return sls.slsChiefLocation != null; // Currently hardcoded as done
+    return sls.slsChiefLocation != null &&
+        sls.slsChiefName != null &&
+        sls.slsChiefName != ''; // Currently hardcoded as done
   }
 
   bool isSecondStepNeeded() {

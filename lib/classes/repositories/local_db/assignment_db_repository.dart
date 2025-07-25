@@ -119,6 +119,22 @@ class AssignmentDbRepository {
     await _provider.updateSlsLocation(slsId, latitude, longitude);
   }
 
+  Future<void> updateSlsLocationAndChief(
+    String slsId,
+    double? latitude,
+    double? longitude,
+    String? chiefName,
+    String? chiefPhone,
+  ) async {
+    await _provider.updateSlsLocationAndChief(
+      slsId,
+      latitude,
+      longitude,
+      chiefName,
+      chiefPhone,
+    );
+  }
+
   Future<void> saveBusinesses(List<Business> businesses) async {
     final businessesJson =
         businesses.map((business) => business.toJson()).toList();

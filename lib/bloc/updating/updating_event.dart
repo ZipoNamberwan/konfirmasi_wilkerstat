@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:konfirmasi_wilkerstat/bloc/updating/updating_state.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
+import 'package:latlong2/latlong.dart';
 
 abstract class UpdatingEvent extends Equatable {
   const UpdatingEvent();
@@ -50,6 +51,29 @@ class UpdateSlsLockedStatus extends UpdatingEvent {
   const UpdateSlsLockedStatus({required this.locked});
 }
 
-class UpdateSlsLocation extends UpdatingEvent {
-  const UpdateSlsLocation();
+class GetCurrentLocation extends UpdatingEvent {
+  const GetCurrentLocation();
+}
+
+class UpdateChiefSlsName extends UpdatingEvent {
+  final String chiefName;
+  const UpdateChiefSlsName({required this.chiefName});
+}
+
+class UpdateChiefSlsPhone extends UpdatingEvent {
+  final String chiefPhone;
+  const UpdateChiefSlsPhone({required this.chiefPhone});
+}
+
+class UpdateChiefSlsLocation extends UpdatingEvent {
+  final LatLng chiefLocation;
+  const UpdateChiefSlsLocation({required this.chiefLocation});
+}
+
+class SaveChiefSlsInfo extends UpdatingEvent {
+  const SaveChiefSlsInfo();
+}
+
+class ResetFormChiefSlsInfo extends UpdatingEvent {
+  const ResetFormChiefSlsInfo();
 }

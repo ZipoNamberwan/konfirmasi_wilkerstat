@@ -181,6 +181,26 @@ class AssignmentDbProvider {
     );
   }
 
+  Future<void> updateSlsLocationAndChief(
+    String slsId,
+    double? latitude,
+    double? longitude,
+    String? chiefName,
+    String? chiefPhone,
+  ) async {
+    await _dbProvider.db.update(
+      'sls',
+      {
+        'latitude': latitude,
+        'longitude': longitude,
+        'sls_chief_name': chiefName,
+        'sls_chief_phone': chiefPhone,
+      },
+      where: 'id = ?',
+      whereArgs: [slsId],
+    );
+  }
+
   Future<void> saveBusinesses(List<Map<String, dynamic>> businesses) async {
     final batch = _dbProvider.db.batch();
 

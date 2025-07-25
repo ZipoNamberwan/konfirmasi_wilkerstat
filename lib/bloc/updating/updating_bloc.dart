@@ -237,6 +237,8 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
             user?.email ?? '',
             state.data.sls.id,
             state.data.businesses.length,
+            state.data.sls.slsChiefName,
+            state.data.sls.slsChiefPhone,
             state.data.sls.slsChiefLocation,
             state.data.businesses,
           );
@@ -311,7 +313,7 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
       );
     });
 
-    on<UpdateSlsLocation>((event, emit) async {
+    on<GetCurrentLocation>((event, emit) async {
       emit(GettingLocation(data: state.data.copyWith(isGettingLocation: true)));
 
       try {
@@ -326,21 +328,11 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
           return;
         }
 
-        await AssignmentDbRepository().updateSlsLocation(
-          state.data.sls.id,
-          position.latitude,
-          position.longitude,
-        );
-
-        final updatedSls = state.data.sls.copyWith(
-          slsChiefLocation: LatLng(position.latitude, position.longitude),
-        );
-
         // Update current location in state
         emit(
           SlsLocationUpdated(
             data: state.data.copyWith(
-              sls: updatedSls,
+              slsChiefLocation: LatLng(position.latitude, position.longitude),
               isGettingLocation: false,
             ),
           ),
@@ -353,6 +345,74 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
           ),
         );
       }
+    });
+
+    on<UpdateChiefSlsName>((event, emit) async {
+      emit(
+        UpdatingState(data: state.data.copyWith(slsChiefName: event.chiefName)),
+      );
+    });
+
+    on<UpdateChiefSlsPhone>((event, emit) async {
+      emit(
+        UpdatingState(
+          data: state.data.copyWith(slsChiefPhone: event.chiefPhone),
+        ),
+      );
+    });
+
+    on<UpdateChiefSlsLocation>((event, emit) async {
+      emit(
+        UpdatingState(
+          data: state.data.copyWith(slsChiefLocation: event.chiefLocation),
+        ),
+      );
+    });
+
+    on<ResetFormChiefSlsInfo>((event, emit) async {
+      emit(UpdatingState(data: state.data.copyWith(resetForm: true)));
+    });
+
+    on<SaveChiefSlsInfo>((event, emit) async {
+      // Validation
+      if (state.data.slsChiefLocation == null) {
+        emit(
+          SaveSlsInfoError(
+            errorMessage:
+                'Lokasi belum diambil. Silakan ambil lokasi terlebih dahulu.',
+            data: state.data.copyWith(isSaveLoading: false),
+          ),
+        );
+        return;
+      }
+      if (state.data.slsChiefName == null ||
+          state.data.slsChiefName!.trim().isEmpty) {
+        emit(
+          SaveSlsInfoError(
+            errorMessage: 'Nama Ketua SLS wajib diisi.',
+            data: state.data.copyWith(isSaveLoading: false),
+          ),
+        );
+        return;
+      }
+      emit(UpdatingState(data: state.data.copyWith(isSaveLoading: true)));
+      await AssignmentDbRepository().updateSlsLocationAndChief(
+        state.data.sls.id,
+        state.data.slsChiefLocation?.latitude,
+        state.data.slsChiefLocation?.longitude,
+        state.data.slsChiefName,
+        state.data.slsChiefPhone,
+      );
+      final updatedSls = state.data.sls.copyWith(
+        slsChiefLocation: state.data.slsChiefLocation,
+        slsChiefName: state.data.slsChiefName,
+        slsChiefPhone: state.data.slsChiefPhone,
+      );
+      emit(
+        SaveSlsInfoSuccess(
+          data: state.data.copyWith(isSaveLoading: false, sls: updatedSls),
+        ),
+      );
     });
   }
 
@@ -380,6 +440,8 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
     String email,
     String slsId,
     int total,
+    String? chiefName,
+    String? chiefPhone,
     LatLng? slsChiefLocation,
     List<Business> businesses,
   ) async {
@@ -393,6 +455,8 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
     data['user_id'] = email;
     data['wilayah'] = slsId;
     data['total'] = total;
+    data['nama_ketua_sls'] = chiefName;
+    data['no_hp'] = chiefPhone;
     data['latitude'] = slsChiefLocation?.latitude;
     data['longitude'] = slsChiefLocation?.longitude;
     data['data'] =

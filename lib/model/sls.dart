@@ -10,6 +10,8 @@ class Sls {
   final bool hasDownloaded;
   final bool locked;
   final LatLng? slsChiefLocation;
+  final String? slsChiefName;
+  final String? slsChiefPhone;
 
   Sls({
     required this.id,
@@ -20,6 +22,8 @@ class Sls {
     required this.hasDownloaded,
     required this.locked,
     this.slsChiefLocation,
+    this.slsChiefName,
+    this.slsChiefPhone,
   });
 
   // Create Sls from JSON
@@ -36,6 +40,8 @@ class Sls {
           json['latitude'] != null && json['longitude'] != null
               ? LatLng(json['latitude'], json['longitude'])
               : null,
+      slsChiefName: json['sls_chief_name'] as String?,
+      slsChiefPhone: json['sls_chief_phone'] as String?,
     );
   }
 
@@ -57,6 +63,14 @@ class Sls {
           json['latitude'] != null && json['longitude'] != null
               ? LatLng(json['latitude'], json['longitude'])
               : null,
+      slsChiefName:
+          json['sls_chief_name'] != null
+              ? json['sls_chief_name'] as String?
+              : null,
+      slsChiefPhone:
+          json['sls_chief_phone'] != null
+              ? json['sls_chief_phone'] as String?
+              : null,
     );
   }
 
@@ -72,6 +86,8 @@ class Sls {
       'locked': locked ? 1 : 0,
       'latitude': slsChiefLocation?.latitude,
       'longitude': slsChiefLocation?.longitude,
+      'sls_chief_name': slsChiefName,
+      'sls_chief_phone': slsChiefPhone,
     };
   }
 
@@ -86,6 +102,8 @@ class Sls {
     bool? hasDownloaded,
     bool? locked,
     LatLng? slsChiefLocation,
+    String? slsChiefName,
+    String? slsChiefPhone,
   }) {
     return Sls(
       id: id ?? this.id,
@@ -96,6 +114,8 @@ class Sls {
       hasDownloaded: hasDownloaded ?? this.hasDownloaded,
       locked: locked ?? this.locked,
       slsChiefLocation: slsChiefLocation ?? this.slsChiefLocation,
+      slsChiefName: slsChiefName ?? this.slsChiefName,
+      slsChiefPhone: slsChiefPhone ?? this.slsChiefPhone,
     );
   }
 }

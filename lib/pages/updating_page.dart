@@ -129,6 +129,88 @@ class _UpdatingPageState extends State<UpdatingPage> {
               ),
             ),
           );
+        } else if (state is NoBusinesses) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          state.data.sls.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    state.data.sls.village.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: const Color(0xFF667eea),
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.white),
+            ),
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF667eea), Color(0xFFF8F9FA)],
+                  stops: [0.0, 0.3],
+                ),
+              ),
+              padding: EdgeInsets.all(32),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(
+                      Icons.info_outline,
+                      size: 56,
+                      color: Color(0xFF667eea),
+                    ),
+                    SizedBox(height: 18),
+                    Text(
+                      'Tidak ada Prelist Usaha',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Color(0xFF2D3748),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Text(
+                        'Tidak ada prelist usaha yang perlu di konfirmasi, sehingga SLS ini tidak perlu dikonfirmasi dan dikirim.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xFF2D3748),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
         }
         return Scaffold(
           appBar: AppBar(

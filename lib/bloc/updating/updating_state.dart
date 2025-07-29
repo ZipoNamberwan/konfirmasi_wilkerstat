@@ -99,6 +99,10 @@ class SaveSlsInfoError extends UpdatingState {
   const SaveSlsInfoError({required this.errorMessage, required super.data});
 }
 
+class NoBusinesses extends UpdatingState {
+  const NoBusinesses({required super.data});
+}
+
 class UpdatingStateData {
   final Sls sls;
   final List<Business> businesses;

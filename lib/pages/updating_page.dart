@@ -580,6 +580,13 @@ class _UpdatingPageState extends State<UpdatingPage> {
                                     );
                                   }
                                 },
+                                onError: (e) {
+                                  CustomSnackBar.show(
+                                    context,
+                                    message: 'Error launching Google Maps',
+                                    type: SnackBarType.error,
+                                  );
+                                },
                               );
                             },
                           ),

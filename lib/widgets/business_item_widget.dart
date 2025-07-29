@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BusinessItemWidget extends StatelessWidget {
   final Business business;
   final Function(Business, BusinessStatus) onStatusChanged;
   final bool isLocked;
+  final Function(Object) onError;
 
   const BusinessItemWidget({
     super.key,
     required this.business,
     required this.onStatusChanged,
     this.isLocked = false,
+    required this.onError,
   });
+
+  void _openGoogleMaps(Business business) async {
+    final lat = business.latitude;
+    final lng = business.longitude;
+    final url = 'https://www.google.com/maps?q=$lat,$lng';
+    // final url =
+    //     'https://www.google.com/maps/search/?api=1&query=${business.latitude},${business.longitude}';
+
+    // Use url_launcher to open the URL
+    try {
+      final uri = Uri.parse(url);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      onError(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +49,12 @@ class BusinessItemWidget extends StatelessWidget {
           children: [
             // Business Name and ID
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
                     business.name,
+                    maxLines: 2,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -42,37 +63,54 @@ class BusinessItemWidget extends StatelessWidget {
                   ),
                 ),
                 // Status indicator
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color:
-                        isLocked
-                            ? Colors.grey[200]
-                            : business.status?.color.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color:
-                          isLocked
-                              ? Colors.grey[400]!
-                              : (business.status?.color.withValues(
-                                    alpha: 0.3,
-                                  ) ??
-                                  Colors.grey[600]!),
-                    ),
-                  ),
-                  child: Text(
-                    business.status?.text ?? BusinessStatus.notConfirmed.text,
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          isLocked
-                              ? Colors.grey[600]!
-                              : (business.status?.color ?? Colors.grey[600]!),
-                    ),
+                InkWell(
+                  onTap: () => _openGoogleMaps(business),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        margin: const EdgeInsets.only(right: 4, left: 4),
+                        decoration: BoxDecoration(
+                          color:
+                              isLocked
+                                  ? Colors.grey[200]
+                                  : business.status?.color.withValues(
+                                    alpha: 0.1,
+                                  ),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color:
+                                isLocked
+                                    ? Colors.grey[400]!
+                                    : (business.status?.color.withValues(
+                                          alpha: 0.3,
+                                        ) ??
+                                        Colors.grey[600]!),
+                          ),
+                        ),
+                        child: Text(
+                          business.status?.text ??
+                              BusinessStatus.notConfirmed.text,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                isLocked
+                                    ? Colors.grey[600]!
+                                    : (business.status?.color ??
+                                        Colors.grey[600]!),
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.open_in_new,
+                        size: 16,
+                        color: isLocked ? Colors.grey[600] : Color(0xFF667eea),
+                      ),
+                    ],
                   ),
                 ),
               ],

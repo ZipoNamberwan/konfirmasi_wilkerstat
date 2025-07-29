@@ -8,6 +8,8 @@ class Business {
   final String name;
   final String? owner;
   final String? address;
+  final String latitude;
+  final String longitude;
   final Sls sls;
   final BusinessStatus? status;
 
@@ -16,6 +18,8 @@ class Business {
     required this.name,
     this.owner,
     this.address,
+    required this.latitude,
+    required this.longitude,
     required this.sls,
     this.status,
   });
@@ -32,6 +36,8 @@ class Business {
           (json['initial_address'] as String?)?.trim().isEmpty ?? true
               ? null
               : json['initial_address'],
+      latitude: json['lat']?.toString() ?? '',
+      longitude: json['long']?.toString() ?? '',
       sls: Sls(
         id: json['sls_id'],
         code: '',
@@ -63,6 +69,8 @@ class Business {
       'name': name,
       'owner': owner,
       'address': address,
+      'lat': latitude,
+      'long': longitude,
       'sls_id': sls.id,
       'status': status?.key,
     };
@@ -78,6 +86,8 @@ class Business {
     String? name,
     String? owner,
     String? address,
+    String? latitude,
+    String? longitude,
     Sls? sls,
     BusinessStatus? status,
   }) {
@@ -86,6 +96,8 @@ class Business {
       name: name ?? this.name,
       owner: owner ?? this.owner,
       address: address ?? this.address,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       sls: sls ?? this.sls,
       status: status ?? this.status,
     );

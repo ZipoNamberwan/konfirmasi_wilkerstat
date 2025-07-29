@@ -63,6 +63,8 @@ class LocalDbProvider {
       name TEXT NOT NULL,
       owner TEXT,
       address TEXT,
+      lat TEXT,
+      long TEXT,
       sls_id TEXT NOT NULL,
       status INTEGER NOT NULL DEFAULT 1,
       FOREIGN KEY(sls_id) REFERENCES sls(id) ON DELETE CASCADE

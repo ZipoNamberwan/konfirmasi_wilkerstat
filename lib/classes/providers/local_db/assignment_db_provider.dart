@@ -210,6 +210,8 @@ class AssignmentDbProvider {
         'name': business['name'],
         'owner': business['owner'],
         'address': business['address'],
+        'lat': business['lat'],
+        'long': business['long'],
         'sls_id': business['sls_id'],
         'status': business['status'],
       }, conflictAlgorithm: ConflictAlgorithm.replace);

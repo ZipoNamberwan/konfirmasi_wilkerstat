@@ -155,6 +155,8 @@ class AssignmentDbRepository {
         name: json['name'] as String,
         owner: json['owner'] as String?,
         address: json['address'] as String?,
+        latitude: json['lat'] as String,
+        longitude: json['long'] as String,
         sls: sls,
         status:
             json['status'] != null

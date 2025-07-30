@@ -44,7 +44,11 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
           sls.map((s) => s.id).toList(),
         );
         if (villages.isEmpty && sls.isEmpty) {
-          emit(NoAssignment(data: state.data.copyWith(isInitializing: false)));
+          emit(
+            NoAssignment(
+              data: state.data.copyWith(isInitializing: false, user: user),
+            ),
+          );
         } else {
           emit(
             ProjectState(

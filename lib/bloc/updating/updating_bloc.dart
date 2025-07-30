@@ -30,14 +30,14 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
 
       final sls = await AssignmentDbRepository().getSlsById(event.slsId);
       // If no businesses found, emit NoBusinesses state
-      if (businesses.isEmpty) {
-        emit(
-          NoBusinesses(
-            data: state.data.copyWith(sls: sls, businesses: businesses),
-          ),
-        );
-        return;
-      }
+      // if (businesses.isEmpty) {
+      //   emit(
+      //     NoBusinesses(
+      //       data: state.data.copyWith(sls: sls, businesses: businesses),
+      //     ),
+      //   );
+      //   return;
+      // }
       final summary = _getBusinessStatusSummary(businesses);
 
       // Apply default sorting

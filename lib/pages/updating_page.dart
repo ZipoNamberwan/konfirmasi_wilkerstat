@@ -287,313 +287,393 @@ class _UpdatingPageState extends State<UpdatingPage> {
               ),
             ],
           ),
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors:
-                    state.data.sls.locked
-                        ? [Colors.orange[600]!, const Color(0xFFF8F9FA)]
-                        : [const Color(0xFF667eea), const Color(0xFFF8F9FA)],
-                stops: const [0.0, 0.3],
-              ),
-            ),
-            child: Column(
-              children: [
-                // Compact Search and Filter Section
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  decoration: const BoxDecoration(color: Colors.white),
-                  child: Column(
-                    children: [
-                      // Search Bar (more compact)
-                      SizedBox(
-                        height: 40,
-                        child: TextField(
-                          enabled: !state.data.sls.locked,
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Cari usaha...',
-                            hintStyle: TextStyle(
-                              fontSize: 14,
-                              color:
-                                  state.data.sls.locked
-                                      ? Colors.grey[400]
-                                      : null,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color:
-                                  state.data.sls.locked
-                                      ? Colors.grey[400]
-                                      : const Color(0xFF718096),
-                              size: 20,
-                            ),
-                            suffixIcon:
-                                state.data.keywordFilter?.isNotEmpty == true
-                                    ? IconButton(
-                                      onPressed:
-                                          state.data.sls.locked
-                                              ? null
-                                              : () {
-                                                _searchController.clear();
-                                                _updatingBloc.add(
-                                                  ClearFilters(
-                                                    clearKeyword: true,
-                                                  ),
-                                                );
-                                              },
-                                      icon: Icon(
-                                        Icons.clear,
-                                        size: 18,
-                                        color:
-                                            state.data.sls.locked
-                                                ? Colors.grey[400]
-                                                : Colors.grey[600],
-                                      ),
-                                    )
-                                    : null,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color:
-                                    state.data.sls.locked
-                                        ? Colors.grey[300]!
-                                        : const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color:
-                                    state.data.sls.locked
-                                        ? Colors.grey[300]!
-                                        : const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey[300]!),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: Color(0xFF667eea),
-                              ),
-                            ),
-                            filled: true,
-                            fillColor:
-                                state.data.sls.locked
-                                    ? Colors.grey[100]
-                                    : const Color(0xFFF7FAFC),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                          ),
-                        ),
+          body:
+              state.data.businesses.isEmpty
+                  ? Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFF667eea), Color(0xFFF8F9FA)],
+                        stops: [0.0, 0.3],
                       ),
-                      const SizedBox(height: 8),
-
-                      // Compact Status Filter
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  _buildCompactFilterChip(
-                                    label: 'Semua',
-                                    isSelected:
-                                        state.data.selectedStatusFilter == null,
-                                    isLocked: state.data.sls.locked,
-                                    onTap:
-                                        state.data.sls.locked
-                                            ? null
-                                            : () {
-                                              _updatingBloc.add(
-                                                FilterByStatus(status: null),
-                                              );
-                                            },
-                                  ),
-                                  const SizedBox(width: 6),
-                                  _buildCompactFilterChip(
-                                    label: 'Ada',
-                                    isSelected:
-                                        state.data.selectedStatusFilter ==
-                                        BusinessStatus.found,
-                                    isLocked: state.data.sls.locked,
-                                    onTap:
-                                        state.data.sls.locked
-                                            ? null
-                                            : () {
-                                              _updatingBloc.add(
-                                                FilterByStatus(
-                                                  status: BusinessStatus.found,
-                                                ),
-                                              );
-                                            },
-                                  ),
-                                  const SizedBox(width: 6),
-                                  _buildCompactFilterChip(
-                                    label: 'Tidak Ada',
-                                    isSelected:
-                                        state.data.selectedStatusFilter ==
-                                        BusinessStatus.notFound,
-                                    isLocked: state.data.sls.locked,
-                                    onTap:
-                                        state.data.sls.locked
-                                            ? null
-                                            : () {
-                                              _updatingBloc.add(
-                                                FilterByStatus(
-                                                  status:
-                                                      BusinessStatus.notFound,
-                                                ),
-                                              );
-                                            },
-                                  ),
-                                  const SizedBox(width: 6),
-                                  _buildCompactFilterChip(
-                                    label: 'Belum Konfirmasi',
-                                    isSelected:
-                                        state.data.selectedStatusFilter ==
-                                        BusinessStatus.notConfirmed,
-                                    isLocked: state.data.sls.locked,
-                                    onTap:
-                                        state.data.sls.locked
-                                            ? null
-                                            : () {
-                                              _updatingBloc.add(
-                                                FilterByStatus(
-                                                  status:
-                                                      BusinessStatus
-                                                          .notConfirmed,
-                                                ),
-                                              );
-                                            },
-                                  ),
-                                ],
-                              ),
+                    ),
+                    padding: EdgeInsets.all(32),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(
+                            Icons.info_outline,
+                            size: 56,
+                            color: Color(0xFF667eea),
+                          ),
+                          SizedBox(height: 18),
+                          Text(
+                            'Tidak ada Prelist Usaha',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFF2D3748),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          // Clear filter button
-                          if (state.data.selectedStatusFilter != null)
-                            GestureDetector(
-                              onTap:
-                                  state.data.sls.locked
-                                      ? null
-                                      : () {
-                                        _updatingBloc.add(
-                                          ClearFilters(clearStatus: true),
-                                        );
-                                      },
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 6),
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color:
-                                      state.data.sls.locked
-                                          ? Colors.grey[50]
-                                          : Colors.grey[100],
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Icon(
-                                  Icons.clear,
-                                  size: 16,
-                                  color:
-                                      state.data.sls.locked
-                                          ? Colors.grey[400]
-                                          : Colors.grey[600],
-                                ),
-                              ),
-                            ),
-                          const SizedBox(width: 6),
-                          // Sort button
-                          GestureDetector(
-                            onTap:
-                                state.data.sls.locked
-                                    ? null
-                                    : () {
-                                      _showSortOptions(
-                                        context,
-                                        state.data.sortBy,
-                                      );
-                                    },
-                            child: Container(
-                              margin: const EdgeInsets.only(left: 6),
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color:
-                                    state.data.sls.locked
-                                        ? Colors.grey[50]
-                                        : Colors.grey[100],
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Stack(
-                                children: [
-                                  Icon(
-                                    Icons.sort,
-                                    size: 16,
-                                    color:
-                                        state.data.sls.locked
-                                            ? Colors.grey[400]
-                                            : Colors.grey[600],
-                                  ),
-                                ],
+                          SizedBox(height: 12),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 24.0),
+                            child: Text(
+                              'Tidak ada prelist usaha yang perlu di konfirmasi, sehingga SLS ini hanya perlu mengisi Nama, No HP dan lokasi tagging ketua SLS/narasumber. Klik tombol kuning di pojok kanan',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Color(0xFF2D3748),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-
-                // Business List (more compact)
-                Expanded(
-                  child:
-                      state.data.filteredBusinesses.isEmpty
-                          ? _buildEmptyState(
-                            state.data.keywordFilter,
-                            state.data.selectedStatusFilter,
-                            state.data.sls.locked,
-                          )
-                          : ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-                            itemCount: state.data.filteredBusinesses.length,
-                            itemBuilder: (context, index) {
-                              final business =
-                                  state.data.filteredBusinesses[index];
-                              return BusinessItemWidget(
-                                business: business,
-                                isLocked: state.data.sls.locked,
-                                onStatusChanged: (bsn, status) {
-                                  if (!state.data.sls.locked) {
-                                    _updatingBloc.add(
-                                      UpdateBusinessStatus(
-                                        business: bsn,
-                                        status: status,
+                    ),
+                  )
+                  : Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors:
+                            state.data.sls.locked
+                                ? [Colors.orange[600]!, const Color(0xFFF8F9FA)]
+                                : [
+                                  const Color(0xFF667eea),
+                                  const Color(0xFFF8F9FA),
+                                ],
+                        stops: const [0.0, 0.3],
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        // Compact Search and Filter Section
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                          decoration: const BoxDecoration(color: Colors.white),
+                          child: Column(
+                            children: [
+                              // Search Bar (more compact)
+                              SizedBox(
+                                height: 40,
+                                child: TextField(
+                                  enabled: !state.data.sls.locked,
+                                  controller: _searchController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Cari usaha...',
+                                    hintStyle: TextStyle(
+                                      fontSize: 14,
+                                      color:
+                                          state.data.sls.locked
+                                              ? Colors.grey[400]
+                                              : null,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.search,
+                                      color:
+                                          state.data.sls.locked
+                                              ? Colors.grey[400]
+                                              : const Color(0xFF718096),
+                                      size: 20,
+                                    ),
+                                    suffixIcon:
+                                        state.data.keywordFilter?.isNotEmpty ==
+                                                true
+                                            ? IconButton(
+                                              onPressed:
+                                                  state.data.sls.locked
+                                                      ? null
+                                                      : () {
+                                                        _searchController
+                                                            .clear();
+                                                        _updatingBloc.add(
+                                                          ClearFilters(
+                                                            clearKeyword: true,
+                                                          ),
+                                                        );
+                                                      },
+                                              icon: Icon(
+                                                Icons.clear,
+                                                size: 18,
+                                                color:
+                                                    state.data.sls.locked
+                                                        ? Colors.grey[400]
+                                                        : Colors.grey[600],
+                                              ),
+                                            )
+                                            : null,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color:
+                                            state.data.sls.locked
+                                                ? Colors.grey[300]!
+                                                : const Color(0xFFE2E8F0),
                                       ),
-                                    );
-                                  }
-                                },
-                                onError: (e) {
-                                  CustomSnackBar.show(
-                                    context,
-                                    message: 'Error launching Google Maps',
-                                    type: SnackBarType.error,
-                                  );
-                                },
-                              );
-                            },
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color:
+                                            state.data.sls.locked
+                                                ? Colors.grey[300]!
+                                                : const Color(0xFFE2E8F0),
+                                      ),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: BorderSide(
+                                        color: Colors.grey[300]!,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      borderSide: const BorderSide(
+                                        color: Color(0xFF667eea),
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor:
+                                        state.data.sls.locked
+                                            ? Colors.grey[100]
+                                            : const Color(0xFFF7FAFC),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Compact Status Filter
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          _buildCompactFilterChip(
+                                            label: 'Semua',
+                                            isSelected:
+                                                state
+                                                    .data
+                                                    .selectedStatusFilter ==
+                                                null,
+                                            isLocked: state.data.sls.locked,
+                                            onTap:
+                                                state.data.sls.locked
+                                                    ? null
+                                                    : () {
+                                                      _updatingBloc.add(
+                                                        FilterByStatus(
+                                                          status: null,
+                                                        ),
+                                                      );
+                                                    },
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _buildCompactFilterChip(
+                                            label: 'Ada',
+                                            isSelected:
+                                                state
+                                                    .data
+                                                    .selectedStatusFilter ==
+                                                BusinessStatus.found,
+                                            isLocked: state.data.sls.locked,
+                                            onTap:
+                                                state.data.sls.locked
+                                                    ? null
+                                                    : () {
+                                                      _updatingBloc.add(
+                                                        FilterByStatus(
+                                                          status:
+                                                              BusinessStatus
+                                                                  .found,
+                                                        ),
+                                                      );
+                                                    },
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _buildCompactFilterChip(
+                                            label: 'Tidak Ada',
+                                            isSelected:
+                                                state
+                                                    .data
+                                                    .selectedStatusFilter ==
+                                                BusinessStatus.notFound,
+                                            isLocked: state.data.sls.locked,
+                                            onTap:
+                                                state.data.sls.locked
+                                                    ? null
+                                                    : () {
+                                                      _updatingBloc.add(
+                                                        FilterByStatus(
+                                                          status:
+                                                              BusinessStatus
+                                                                  .notFound,
+                                                        ),
+                                                      );
+                                                    },
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _buildCompactFilterChip(
+                                            label: 'Belum Konfirmasi',
+                                            isSelected:
+                                                state
+                                                    .data
+                                                    .selectedStatusFilter ==
+                                                BusinessStatus.notConfirmed,
+                                            isLocked: state.data.sls.locked,
+                                            onTap:
+                                                state.data.sls.locked
+                                                    ? null
+                                                    : () {
+                                                      _updatingBloc.add(
+                                                        FilterByStatus(
+                                                          status:
+                                                              BusinessStatus
+                                                                  .notConfirmed,
+                                                        ),
+                                                      );
+                                                    },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  // Clear filter button
+                                  if (state.data.selectedStatusFilter != null)
+                                    GestureDetector(
+                                      onTap:
+                                          state.data.sls.locked
+                                              ? null
+                                              : () {
+                                                _updatingBloc.add(
+                                                  ClearFilters(
+                                                    clearStatus: true,
+                                                  ),
+                                                );
+                                              },
+                                      child: Container(
+                                        margin: const EdgeInsets.only(left: 6),
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              state.data.sls.locked
+                                                  ? Colors.grey[50]
+                                                  : Colors.grey[100],
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.clear,
+                                          size: 16,
+                                          color:
+                                              state.data.sls.locked
+                                                  ? Colors.grey[400]
+                                                  : Colors.grey[600],
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 6),
+                                  // Sort button
+                                  GestureDetector(
+                                    onTap:
+                                        state.data.sls.locked
+                                            ? null
+                                            : () {
+                                              _showSortOptions(
+                                                context,
+                                                state.data.sortBy,
+                                              );
+                                            },
+                                    child: Container(
+                                      margin: const EdgeInsets.only(left: 6),
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color:
+                                            state.data.sls.locked
+                                                ? Colors.grey[50]
+                                                : Colors.grey[100],
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Icon(
+                                            Icons.sort,
+                                            size: 16,
+                                            color:
+                                                state.data.sls.locked
+                                                    ? Colors.grey[400]
+                                                    : Colors.grey[600],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                ),
-              ],
-            ),
-          ),
+                        ),
+
+                        // Business List (more compact)
+                        Expanded(
+                          child:
+                              state.data.filteredBusinesses.isEmpty
+                                  ? _buildEmptyState(
+                                    state.data.keywordFilter,
+                                    state.data.selectedStatusFilter,
+                                    state.data.sls.locked,
+                                  )
+                                  : ListView.builder(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      4,
+                                      16,
+                                      80,
+                                    ),
+                                    itemCount:
+                                        state.data.filteredBusinesses.length,
+                                    itemBuilder: (context, index) {
+                                      final business =
+                                          state.data.filteredBusinesses[index];
+                                      return BusinessItemWidget(
+                                        business: business,
+                                        isLocked: state.data.sls.locked,
+                                        onStatusChanged: (bsn, status) {
+                                          if (!state.data.sls.locked) {
+                                            _updatingBloc.add(
+                                              UpdateBusinessStatus(
+                                                business: bsn,
+                                                status: status,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        onError: (e) {
+                                          CustomSnackBar.show(
+                                            context,
+                                            message:
+                                                'Error launching Google Maps',
+                                            type: SnackBarType.error,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
           floatingActionButton:
               state.data.sls.locked
                   ? Column(

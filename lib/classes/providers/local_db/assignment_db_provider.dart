@@ -1,10 +1,12 @@
 import 'package:konfirmasi_wilkerstat/classes/providers/local_db/local_db_provider.dart';
+import 'package:konfirmasi_wilkerstat/classes/services/shared_preference_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 class AssignmentDbProvider {
   static final AssignmentDbProvider _instance =
       AssignmentDbProvider._internal();
   factory AssignmentDbProvider() => _instance;
+  late SharedPreferenceService _sharedPreferenceService;
 
   AssignmentDbProvider._internal();
 
@@ -16,6 +18,8 @@ class AssignmentDbProvider {
     _initialized = true;
     _dbProvider = LocalDbProvider();
     await _dbProvider.init();
+    _sharedPreferenceService = SharedPreferenceService();
+    await _sharedPreferenceService.init();
   }
 
   Future<void> saveVillages(List<Map<String, dynamic>> villages) async {
@@ -220,6 +224,38 @@ class AssignmentDbProvider {
     await batch.commit(noResult: true);
   }
 
+  Future<void> saveBusinessesFromMultipleSls(
+    List<Map<String, dynamic>> businesses,
+  ) async {
+    final batch = _dbProvider.db.batch();
+
+    for (final business in businesses) {
+      // Check if business already exists
+      final existingBusiness = await _dbProvider.db.query(
+        'business',
+        where: 'id = ?',
+        whereArgs: [business['id']],
+        limit: 1,
+      );
+
+      if (existingBusiness.isEmpty) {
+        // Business doesn't exist, insert new one
+        batch.insert('business', {
+          'id': business['id'],
+          'name': business['name'],
+          'owner': business['owner'],
+          'address': business['address'],
+          'lat': business['lat'],
+          'long': business['long'],
+          'sls_id': business['sls_id'],
+          'status': business['status'],
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+    }
+
+    await batch.commit(noResult: true);
+  }
+
   Future<List<Map<String, dynamic>>> getBusinessesBySls(String slsId) async {
     return await _dbProvider.db.query(
       'business',
@@ -307,5 +343,26 @@ class AssignmentDbProvider {
     }
 
     return allSlsSummary;
+  }
+
+  List<String> getUpdatedPrelist() {
+    return _sharedPreferenceService.prefs.getStringList('updated_prelist') ??
+        [];
+  }
+
+  Future<void> addUpdatedPrelistSls(String newItem) async {
+    final prefs = _sharedPreferenceService.prefs;
+    final List<String> currentList =
+        prefs.getStringList('updated_prelist') ?? [];
+    currentList.add(newItem);
+    await prefs.setStringList('updated_prelist', currentList);
+  }
+
+  Future<void> removeUpdatedPrelistSls(String item) async {
+    final prefs = _sharedPreferenceService.prefs;
+    final List<String> currentList =
+        prefs.getStringList('updated_prelist') ?? [];
+    currentList.remove(item);
+    await prefs.setStringList('updated_prelist', currentList);
   }
 }

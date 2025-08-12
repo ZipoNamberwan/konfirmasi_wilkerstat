@@ -30,6 +30,7 @@ class VersionCheckingRepository {
     final Map<String, dynamic> versioningData = {
       'shouldUpdate': response['should_update'],
       'version': Version.fromJson(response['latest_version']),
+      'assignments': response['assignments'],
     };
     return versioningData;
   }

@@ -43,4 +43,22 @@ class AssignmentRepository {
         .map<Map<String, dynamic>>((item) => item as Map<String, dynamic>)
         .toList();
   }
+
+  Future<List<Map<String, dynamic>>> downloadBusinessesByMultipleSls(
+    List<String> slsIds,
+  ) async {
+    final businessesJson = await _assignmentProvider
+        .downloadBusinessesByMultipleSls(slsIds);
+
+    return businessesJson
+        .map<Map<String, dynamic>>((item) => item as Map<String, dynamic>)
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> updatePrelistStatus(
+    List<String> slsIds,
+    bool downloaded,
+  ) async {
+    return await _assignmentProvider.updatePrelistStatus(slsIds, downloaded);
+  }
 }

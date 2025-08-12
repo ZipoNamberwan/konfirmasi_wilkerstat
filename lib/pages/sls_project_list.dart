@@ -20,6 +20,8 @@ import 'package:konfirmasi_wilkerstat/widgets/user_info_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/version_update_dialog.dart';
 import 'package:konfirmasi_wilkerstat/widgets/village_card_widget.dart';
 import 'package:konfirmasi_wilkerstat/widgets/logout_confirmation_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/update_assignment_dialog.dart';
+import 'package:konfirmasi_wilkerstat/widgets/new_prelist_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SlsProjectList extends StatefulWidget {
@@ -175,12 +177,53 @@ class _SlsProjectListState extends State<SlsProjectList> {
     }
   }
 
+  void _showUpdateAssignmentDialog(
+    BuildContext context,
+    List<String> localAssignments,
+    List<String> serverAssignments,
+  ) {
+    UpdateAssignmentDialog.show(
+      context: context,
+      localAssignments: localAssignments,
+      serverAssignments: serverAssignments,
+      onUpdate: () {
+        _projectBloc.add(DownloadAssignments());
+      },
+      onCancel: () {
+        // User chose to skip for now
+      },
+    );
+  }
+
+  Future<void> _showNewPrelistDialog(
+    BuildContext context,
+    List<String> newPrelist,
+  ) async {
+    await NewPrelistDialog.show(context: context, newPrelist: newPrelist);
+    _projectBloc.add(UpdateLastUpdate());
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<VersionBloc, VersionState>(
       listener: (context, versionState) {
         if (versionState is UpdateNotification) {
           _showVersionUpdateDialog(context, versionState.data.newVersion);
+        } else if (versionState is NewAssignments) {
+          _showUpdateAssignmentDialog(
+            context,
+            versionState.localAssignments,
+            versionState.serverAssignments,
+          );
+        } else if (versionState is NewPrelistNotification) {
+          _showNewPrelistDialog(context, versionState.newPrelist);
+        } else if (versionState is DownloadNewPrelistSuccess) {
+          Navigator.of(context).pop();
+          CustomSnackBar.show(
+            context,
+            message: 'Data prelist berhasil diunduh',
+            type: SnackBarType.success,
+          );
         }
       },
       builder: (context, versionState) {

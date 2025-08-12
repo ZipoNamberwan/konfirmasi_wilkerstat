@@ -141,6 +141,12 @@ class AssignmentDbRepository {
     await _provider.saveBusinesses(businessesJson);
   }
 
+  Future<void> saveBusinessesFromMultipleSls(List<Business> businesses) async {
+    final businessesJson =
+        businesses.map((business) => business.toJson()).toList();
+    await _provider.saveBusinessesFromMultipleSls(businessesJson);
+  }
+
   Future<void> updateBusinessStatus(String businessId, int status) async {
     await _provider.updateBusinessStatus(businessId, status);
   }
@@ -180,5 +186,17 @@ class AssignmentDbRepository {
 
   Future<Map<String, Map<int, int>>> getAllSlsBusinessStatusSummary() async {
     return await _provider.getAllSlsBusinessStatusSummary();
+  }
+
+  Future<List<String>> getUpdatedPrelistSls() async {
+    return _provider.getUpdatedPrelist();
+  }
+
+  Future<void> addUpdatedPrelistSls(String sls) async {
+    await _provider.addUpdatedPrelistSls(sls);
+  }
+
+  Future<void> removeUpdatedPrelistSls(String sls) async {
+    await _provider.removeUpdatedPrelistSls(sls);
   }
 }

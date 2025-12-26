@@ -878,7 +878,7 @@ class _UpdatingPageState extends State<UpdatingPage> {
       builder: (BuildContext context) {
         return SendConfirmationDialog(
           onConfirm: () {
-            _updatingBloc.add(const SendData());
+            _updatingBloc.add(const SendDataDirectToServer());
           },
         );
       },

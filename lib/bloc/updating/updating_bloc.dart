@@ -9,6 +9,7 @@ import 'package:konfirmasi_wilkerstat/classes/api_server_handler.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/assignment_db_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/upload_db_repository.dart';
+import 'package:konfirmasi_wilkerstat/classes/repositories/project_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/third_party_repository.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/upload.dart';
@@ -263,6 +264,93 @@ class UpdatingBloc extends Bloc<UpdatingEvent, UpdatingState> {
             fileName: '${state.data.sls.id}.json',
             folderId: '1bKoOGTtL6niuogM6XNl1EpgizNgPeRQ6',
           );
+
+          await UploadDbRepository().saveSlsUpload(
+            SlsUpload(
+              id: _uuid.v4(),
+              createdAt: DateTime.now(),
+              slsId: state.data.sls.id,
+            ),
+          );
+          await AssignmentDbRepository().updateSlsLockedStatus(
+            state.data.sls.id,
+            true,
+          );
+
+          final slsUploads = await UploadDbRepository().getSlsUploadBySlsId(
+            state.data.sls.id,
+          );
+          emit(
+            SendDataSuccess(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                clearSendingMessage: true,
+                slsUploads: slsUploads,
+                sls: state.data.sls.copyWith(locked: true),
+              ),
+            ),
+          );
+        },
+        onLoginExpired: (e) {
+          emit(
+            TokenExpired(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                sendingMessage: null,
+              ),
+            ),
+          );
+        },
+        onDataProviderError: (e) {
+          emit(
+            SendDataFailed(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                sendingMessage: e.message,
+              ),
+            ),
+          );
+        },
+        onOtherError: (e) {
+          emit(
+            SendDataFailed(
+              data: state.data.copyWith(
+                isSendingToServer: false,
+                sendingMessage: 'Terjadi kesalahan: ${e.toString()}',
+              ),
+            ),
+          );
+        },
+      );
+    });
+
+    on<SendDataDirectToServer>((event, emit) async {
+      await ApiServerHandler.run(
+        action: () async {
+          emit(
+            UpdatingState(
+              data: state.data.copyWith(
+                isSendingToServer: true,
+                sendingMessage: 'Memulai pengiriman data...',
+              ),
+            ),
+          );
+
+          final user = AuthRepository().getUser();
+          final data = <String, dynamic>{};
+          data['user_id'] = user?.email ?? '';
+          data['wilayah'] = state.data.sls.id;
+          data['total'] = state.data.businesses.length;
+          data['nama_ketua_sls'] = state.data.sls.slsChiefName;
+          data['no_hp'] = state.data.sls.slsChiefPhone;
+          data['latitude'] = state.data.sls.slsChiefLocation?.latitude;
+          data['longitude'] = state.data.sls.slsChiefLocation?.longitude;
+          data['data'] =
+              state.data.businesses
+                  .map((business) => business.toJsonForUpload())
+                  .toList();
+
+          await ProjectRepository().sendDataDirectToServer(data: data);
 
           await UploadDbRepository().saveSlsUpload(
             SlsUpload(

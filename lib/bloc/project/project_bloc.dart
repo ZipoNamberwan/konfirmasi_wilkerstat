@@ -6,15 +6,15 @@ import 'package:konfirmasi_wilkerstat/classes/repositories/assignment_repository
 import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/assignment_db_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/upload_db_repository.dart';
-import 'package:konfirmasi_wilkerstat/classes/repositories/third_party_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/telegram_logger.dart';
 import 'package:konfirmasi_wilkerstat/model/business.dart';
 import 'package:konfirmasi_wilkerstat/model/sls.dart';
 import 'package:konfirmasi_wilkerstat/model/village.dart';
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:crypto/crypto.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
+// import 'package:konfirmasi_wilkerstat/classes/repositories/third_party_repository.dart';
+// import 'dart:convert';
+// import 'dart:typed_data';
+// import 'package:crypto/crypto.dart';
+// import 'package:encrypt/encrypt.dart' as encrypt;
 
 class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   ProjectBloc()
@@ -79,11 +79,11 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
           emit(
             ProjectState(data: state.data.copyWith(isDownloadingVillage: true)),
           );
-          final encryptedVillageId = _encryptVillageId(event.villageId);
-          final result = await ThirdPartyRepository()
-              .getBusinessByVillageViaCloudflare(encryptedVillageId);
-          // final result = await AssignmentRepository()
-          //     .downloadBusinessesByVillage(event.villageId);
+          // final encryptedVillageId = _encryptVillageId(event.villageId);
+          // final result = await ThirdPartyRepository()
+          //     .getBusinessByVillageViaCloudflare(encryptedVillageId);
+          final result = await AssignmentRepository()
+              .downloadBusinessesByVillage(event.villageId);
           final businesses =
               result.map((json) {
                 return Business.fromJson(json);
@@ -307,40 +307,40 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     });
   }
 
-  String _encryptVillageId(String villageId) {
-    final secret = 'TqubAjeim3xjLf5AR6KCGWUQRjR0PQdK';
+  // String _encryptVillageId(String villageId) {
+  //   final secret = 'TqubAjeim3xjLf5AR6KCGWUQRjR0PQdK';
 
-    final hashed = sha256.convert(utf8.encode(secret)).toString();
+  //   final hashed = sha256.convert(utf8.encode(secret)).toString();
 
-    List<int> hexToBytes(String hex) {
-      final result = <int>[];
-      for (var i = 0; i < hex.length; i += 2) {
-        result.add(int.parse(hex.substring(i, i + 2), radix: 16));
-      }
-      return result;
-    }
+  //   List<int> hexToBytes(String hex) {
+  //     final result = <int>[];
+  //     for (var i = 0; i < hex.length; i += 2) {
+  //       result.add(int.parse(hex.substring(i, i + 2), radix: 16));
+  //     }
+  //     return result;
+  //   }
 
-    final keyBytes = hexToBytes(hashed.substring(0, 32)); // 16 bytes
-    final ivSourceBytes = hexToBytes(
-      hashed.substring(32, 48),
-    ); // 8 bytes only (matches JS)
+  //   final keyBytes = hexToBytes(hashed.substring(0, 32)); // 16 bytes
+  //   final ivSourceBytes = hexToBytes(
+  //     hashed.substring(32, 48),
+  //   ); // 8 bytes only (matches JS)
 
-    // Pad IV to 16 bytes like CryptoJS does
-    final ivPadded = Uint8List(16)
-      ..setRange(0, ivSourceBytes.length, ivSourceBytes);
+  //   // Pad IV to 16 bytes like CryptoJS does
+  //   final ivPadded = Uint8List(16)
+  //     ..setRange(0, ivSourceBytes.length, ivSourceBytes);
 
-    final key = encrypt.Key(Uint8List.fromList(keyBytes));
-    final iv = encrypt.IV(ivPadded);
+  //   final key = encrypt.Key(Uint8List.fromList(keyBytes));
+  //   final iv = encrypt.IV(ivPadded);
 
-    final encrypter = encrypt.Encrypter(
-      encrypt.AES(key, mode: encrypt.AESMode.cbc),
-    );
+  //   final encrypter = encrypt.Encrypter(
+  //     encrypt.AES(key, mode: encrypt.AESMode.cbc),
+  //   );
 
-    final encrypted = encrypter.encrypt(villageId, iv: iv);
+  //   final encrypted = encrypter.encrypt(villageId, iv: iv);
 
-    return encrypted.base64
-        .replaceAll('+', '-')
-        .replaceAll('/', '_')
-        .replaceAll(RegExp(r'=+$'), '');
-  }
+  //   return encrypted.base64
+  //       .replaceAll('+', '-')
+  //       .replaceAll('/', '_')
+  //       .replaceAll(RegExp(r'=+$'), '');
+  // }
 }

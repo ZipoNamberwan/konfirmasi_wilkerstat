@@ -46,6 +46,10 @@ class SendData extends UpdatingEvent {
   const SendData();
 }
 
+class SendDataDirectToServer extends UpdatingEvent {
+  const SendDataDirectToServer();
+}
+
 class UpdateSlsLockedStatus extends UpdatingEvent {
   final bool locked;
   const UpdateSlsLockedStatus({required this.locked});

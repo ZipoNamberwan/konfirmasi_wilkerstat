@@ -15,4 +15,10 @@ class ProjectRepository {
     _projectProvider = ProjectProvider();
     await _projectProvider.init();
   }
+
+  Future<Map<String, dynamic>> sendDataDirectToServer({
+    required Map<String, dynamic> data,
+  }) async {
+    return await _projectProvider.sendDataDirectToServer(data: data);
+  }
 }

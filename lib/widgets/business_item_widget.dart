@@ -64,7 +64,12 @@ class BusinessItemWidget extends StatelessWidget {
                 ),
                 // Status indicator
                 InkWell(
-                  onTap: () => _openGoogleMaps(business),
+                  onTap:
+                      () =>
+                          ((business.latitude != '0') &&
+                                  (business.longitude != '0'))
+                              ? _openGoogleMaps(business)
+                              : null,
                   child: Row(
                     children: [
                       Container(
@@ -105,11 +110,14 @@ class BusinessItemWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Icon(
-                        Icons.open_in_new,
-                        size: 16,
-                        color: isLocked ? Colors.grey[600] : Color(0xFF667eea),
-                      ),
+                      if ((business.latitude != '0') &&
+                          (business.longitude != '0'))
+                        Icon(
+                          Icons.open_in_new,
+                          size: 16,
+                          color:
+                              isLocked ? Colors.grey[600] : Color(0xFF667eea),
+                        ),
                     ],
                   ),
                 ),

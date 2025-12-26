@@ -15,4 +15,15 @@ class ProjectProvider {
     _dioService = DioService();
     await _dioService.init();
   }
+
+  Future<Map<String, dynamic>> sendDataDirectToServer({
+    required Map<String, dynamic> data,
+  }) async {
+    final response = await _dioService.dio.post(
+      '/assignments/wilkerstat/update',
+      data: data,
+    );
+
+    return response.data;
+  }
 }

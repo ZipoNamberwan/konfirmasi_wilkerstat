@@ -13,6 +13,7 @@ import 'package:konfirmasi_wilkerstat/classes/repositories/assignment_repository
 import 'package:konfirmasi_wilkerstat/classes/repositories/auth_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/assignment_db_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/local_db/upload_db_repository.dart';
+import 'package:konfirmasi_wilkerstat/classes/repositories/project_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/third_party_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/repositories/version_checking_repository.dart';
 import 'package:konfirmasi_wilkerstat/classes/telegram_logger.dart';
@@ -86,6 +87,7 @@ Future<void> _initializeApp() async {
   await ThirdPartyRepository().init();
   await UploadDbRepository().init();
   await VersionCheckingRepository().init();
+  await ProjectRepository().init();
 }
 
 class MyApp extends StatelessWidget {

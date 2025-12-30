@@ -66,8 +66,8 @@ class BusinessItemWidget extends StatelessWidget {
                 InkWell(
                   onTap:
                       () =>
-                          ((business.latitude != '0') &&
-                                  (business.longitude != '0'))
+                          ((business.latitude != '') &&
+                                  (business.longitude != ''))
                               ? _openGoogleMaps(business)
                               : null,
                   child: Row(
@@ -110,8 +110,8 @@ class BusinessItemWidget extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if ((business.latitude != '0') &&
-                          (business.longitude != '0'))
+                      if ((business.latitude != '') &&
+                          (business.longitude != ''))
                         Icon(
                           Icons.open_in_new,
                           size: 16,

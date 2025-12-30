@@ -1,6 +1,6 @@
 class AppConfig {
-  static const String baseurl = 'http://192.168.1.13:8000';
-//   static const String baseurl = 'https://kendedes.cathajatim.id';
+  // static const String baseurl = 'http://192.168.1.13:8000';
+  static const String baseurl = 'https://kendedes.cathajatim.id';
   static const String apiUrl = '$baseurl/api';
   static const String updateUrl = 'https://s.bps.go.id/kenarok';
   static const String majapahitLoginUrl =
